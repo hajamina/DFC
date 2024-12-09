@@ -102,36 +102,26 @@ Deze kaart toont het gemiddelde van de Duurzaamheidsindex per stadsdeel.
 Groene gebieden geven een hogere duurzaamheidsprestatie aan.
 """)
 
-gdf["Duurzaamheidsindex"] = pd.to_numeric(gdf["Duurzaamheidsindex"], errors="coerce")
-
-# Daarna de berekening opnieuw proberen voor de stadsdelen
 if "Stadsdeel" in gdf.columns:
     # Bereken het gemiddelde van de Duurzaamheidsindex per Stadsdeel
     stadsdeel_avg = gdf.dissolve(by="Stadsdeel", aggfunc="mean", as_index=False)
     
+    # Zet de geometrie om naar GeoJSON-formaat
+    geo_data = stadsdeel_avg.__geo_interface__
+
     # Maak de kaart voor Duurzaamheidsindex per Stadsdeel
     m = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
 
+    # Voeg de choropleth toe
     folium.Choropleth(
-        geo_data=stadsdeel_avg,
-        data=stadsdeel_avg,
-        columns=["Stadsdeel", "Duurzaamheidsindex"],
-        key_on="feature.properties.Stadsdeel",
-        fill_color="BuGn",
+        geo_data=geo_data,  # GeoJSON-gegevens voor de choropleth
+        data=stadsdeel_avg,  # Data voor de Duurzaamheidsindex
+        columns=["Stadsdeel", "Duurzaamheidsindex"],  # Kolommen met stadsdeel en duurzaamheidsindex
+        key_on="feature.properties.Stadsdeel",  # Zorg ervoor dat 'Stadsdeel' de juiste naam is in de GeoJSON
+        fill_color="BuGn",  # Kleuren voor de choropleth
         fill_opacity=0.7,
         line_opacity=0.2,
-        legend_name="Duurzaamheidsindex"
-    ).add_to(m)
-
-    folium.GeoJson(
-        data=stadsdeel_avg,
-        style_function=lambda x: {"fillOpacity": 0, "color": "white", "weight": 0.5},
-        highlight_function=lambda x: {"weight": 2, "color": "blue", "fillOpacity": 0.7},
-        tooltip=folium.GeoJsonTooltip(
-            fields=["Stadsdeel", "Duurzaamheidsindex"],
-            aliases=["Stadsdeel:", "Gemiddelde Duurzaamheidsindex:"],
-            localize=True
-        ),
+        legend_name="Duurzaamheidsindex"  # Legenda-naam
     ).add_to(m)
 
     st_folium(m, width=800, height=500)
