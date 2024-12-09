@@ -104,9 +104,6 @@ Groene gebieden geven een hogere duurzaamheidsprestatie aan.
 
 gdf["Duurzaamheidsindex"] = pd.to_numeric(gdf["Duurzaamheidsindex"], errors="coerce")
 
-# Controleer opnieuw of het type correct is
-print(gdf["Duurzaamheidsindex"].dtype)
-
 # Daarna de berekening opnieuw proberen voor de stadsdelen
 if "Stadsdeel" in gdf.columns:
     # Bereken het gemiddelde van de Duurzaamheidsindex per Stadsdeel
