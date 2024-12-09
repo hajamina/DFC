@@ -28,7 +28,7 @@ Welkom bij de **Duurzaamheidsatlas van Amsterdam (2024)**!
 Deze interactieve applicatie presenteert de resultaten van mijn onderzoek naar de **Duurzaamheidsindex**, een samengestelde maat die de duurzaamheid van Amsterdamse buurten meet.  
 
 De index combineert verschillende indicatoren, zoals:  
-- **Energielabels** (A++++ tot B)  
+- **Groene aanbod** (A++++ tot B)  
 - **Aardgasvrije woningen**  
 - **Aantal zonnepanelen**  
 
@@ -37,7 +37,7 @@ Met deze visualisaties krijgt u inzicht in hoe buurten presteren op het gebied v
 Gebruik de kaarten en grafieken om trends te ontdekken, buurten te vergelijken, en strategische inzichten te verkrijgen voor een duurzamer Amsterdam!
 """)
 
-gdf = gpd.read_file("output2.geojson")
+gdf = gpd.read_file("output.geojson")
 
 st.subheader("Kaart van de Duurzaamheidsindex")
 st.markdown("""
@@ -87,8 +87,8 @@ folium.GeoJson(
         sticky=False
     ),
     popup=folium.GeoJsonPopup(
-        fields=["Buurt", "Duurzaamheidsindex", "Energielabel A++++ t/m B (%)", "aardgasvrije woningequivalenten", "aantal_zonnepanelen"],
-        aliases=["Buurt:", "Duurzaamheidsindex:", "Energielabel A-B (%):", "Aardgasvrije woningen:", "Zonnepanelen:"],
+        fields=["Buurt", "Duurzaamheidsindex", "Aanbod groen (1-10)", "aardgasvrije woningequivalenten", "aantal_zonnepanelen"],
+        aliases=["Buurt:", "Duurzaamheidsindex:", "Aanbod groen (1-10):", "Aardgasvrije woningen:", "Zonnepanelen:"],
         max_width=300
     )
 ).add_to(m)
