@@ -4,11 +4,11 @@
 # In[31]:
 
 
-import streamlit as st
-import folium
-from streamlit_folium import st_folium
-import geopandas as gpd
-from folium.plugins import MarkerCluster
+import streamlit as st # type: ignore
+import folium # type: ignore
+from streamlit_folium import st_folium # type: ignore
+import geopandas as gpd # type: ignore
+from folium.plugins import MarkerCluster # type: ignore
 
 st.markdown("""
     <style>
@@ -48,7 +48,7 @@ Klik op een buurt voor meer details.
 m = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
 
 # Choropleth toevoegen
-folium.Choropleth(
+choropleth = folium.Choropleth(
     geo_data=gdf,
     data=gdf,
     columns=["Buurtcode", "Duurzaamheidsindex"],
@@ -59,27 +59,42 @@ folium.Choropleth(
     legend_name="Duurzaamheidsindex (0-1)"
 ).add_to(m)
 
-# Popup met buurtinformatie toevoegen
+# Click-popup toevoegen aan de buurten
+def style_function(feature):
+    return {
+        "fillOpacity": 0.7,
+        "weight": 0.5,
+        "color": "white"
+    }
 
+def highlight_function(feature):
+    return {
+        "fillOpacity": 1,
+        "weight": 2,
+        "color": "blue"
+    }
 
-for _, row in gdf.iterrows():
-    popup = folium.Popup(
-        f"""
-        <b>Buurt:</b> {row['Buurt']}<br>
-        <b>Duurzaamheidsindex:</b> {row['Duurzaamheidsindex']:.3f}<br>
-        <b>Energielabel A-B (%):</b> {row['Energielabel A++++ t/m B (%)']}<br>
-        <b>Aardgasvrije woningen:</b> {row['aardgasvrije woningequivalenten']}<br>
-        <b>Zonnepanelen:</b> {row['aantal_zonnepanelen']}
-        """,
+folium.GeoJson(
+    gdf,
+    style_function=style_function,
+    highlight_function=highlight_function,
+    tooltip=folium.GeoJsonTooltip(
+        fields=["Buurt", "Duurzaamheidsindex"],
+        aliases=["Buurt:", "Duurzaamheidsindex:"],
+        localize=True,
+        sticky=False
+    ),
+    popup=folium.GeoJsonPopup(
+        fields=["Buurt", "Duurzaamheidsindex", "Energielabel A++++ t/m B (%)", "aardgasvrije woningequivalenten", "aantal_zonnepanelen"],
+        aliases=["Buurt:", "Duurzaamheidsindex:", "Energielabel A-B (%):", "Aardgasvrije woningen:", "Zonnepanelen:"],
         max_width=300
     )
-    marker = folium.Marker(location=[row["LAT"], row["LNG"]], popup=popup)
-    marker.add_to(m)
+).add_to(m)
 
 # Kaart weergeven in Streamlit
 st_folium(m, width=800, height=500)
 
-from folium.plugins import HeatMap
+from folium.plugins import HeatMap # type: ignore
 
 # Kaart maken
 st.subheader("Warmtekaart: Concentratie van Zonnepanelen")
@@ -118,26 +133,6 @@ m.get_root().html.add_child(folium.Element(legend_html))
 # Kaart in Streamlit weergeven
 st_folium(m, width=800, height=500)
 
-# Legenda toevoegen
-legend_html = '''
-<div style="position: fixed; 
-            bottom: 10px; left: 10px; width: 300px; height: 120px; 
-            background-color: white; z-index:9999; font-size:14px;
-            border:2px solid grey; border-radius:5px; padding: 10px;">
-    <b>Legenda:</b><br>
-    <i style="background: #3186cc; color: white; font-size:12px; padding: 4px 6px; border-radius: 3px;">Cluster</i>
-    : Groepering van meerdere locaties<br>
-    <i style="background: #3186cc; color: white; font-size:12px; padding: 4px 6px; border-radius: 3px;">Marker</i>
-    : Individuele locatie<br>
-    <b>Klik op een marker:</b> Bekijk details zoals het aantal aardgasvrije equivalenten.<br>
-</div>
-'''
-m.get_root().html.add_child(folium.Element(legend_html))
-
-# Kaart weergeven in Streamlit
-st_folium(m, width=800, height=500)
-
-
 # Introductie
 st.subheader("Cluster Map: Locaties van Aardgasvrije Woningequivalenten")
 st.markdown("""
@@ -151,63 +146,14 @@ m = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
 marker_cluster = MarkerCluster().add_to(m)
 
 # Markers toevoegen
-for index, row in data.iterrows():
+for index, row in gdf.iterrows():
     folium.Marker(
         location=[row["LAT"], row["LNG"]],
         popup=f"<b>Buurt:</b> {row['Buurt']}<br><b>Aardgasvrije Equivalenten:</b> {row['aardgasvrije woningequivalenten']}"
     ).add_to(marker_cluster)
 
-# Legenda toevoegen
-legend_html = '''
-<div style="position: fixed; 
-            bottom: 10px; left: 10px; width: 300px; height: 120px; 
-            background-color: white; z-index:9999; font-size:14px;
-            border:2px solid grey; border-radius:5px; padding: 10px;">
-    <b>Legenda:</b><br>
-    <i style="background: #3186cc; color: white; font-size:12px; padding: 4px 6px; border-radius: 3px;">Cluster</i>
-    : Groepering van meerdere locaties<br>
-    <i style="background: #3186cc; color: white; font-size:12px; padding: 4px 6px; border-radius: 3px;">Marker</i>
-    : Individuele locatie<br>
-    <b>Klik op een marker:</b> Bekijk details zoals het aantal aardgasvrije equivalenten.<br>
-</div>
-'''
-m.get_root().html.add_child(folium.Element(legend_html))
 
 # Kaart weergeven in Streamlit
 st_folium(m, width=800, height=500)
-
-
-from folium.plugins import DualMap
-
-st.subheader("Vergelijking: Twee Buurten")
-dual_map = DualMap(location=[52.3728, 4.8936], zoom_start=12)
-
-# Duurzaamheidsindex toevoegen aan de eerste kaart
-folium.Choropleth(
-    geo_data=gdf,
-    data=gdf,
-    columns=["Buurtcode", "Duurzaamheidsindex"],
-    key_on="feature.properties.Buurtcode",
-    fill_color="YlGnBu",
-    fill_opacity=0.7,
-    line_opacity=0.2
-).add_to(dual_map.m1)
-
-# Energielabels toevoegen aan de tweede kaart
-folium.Choropleth(
-    geo_data=gdf,
-    data=gdf,
-    columns=["Buurtcode", "Energielabel_normalized"],
-    key_on="feature.properties.Buurtcode",
-    fill_color="BuPu",
-    fill_opacity=0.7,
-    line_opacity=0.2
-).add_to(dual_map.m2)
-
-st_folium(dual_map, width=800, height=500)
-
-# In[ ]:
-
-
 
 
