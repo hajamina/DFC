@@ -101,10 +101,17 @@ Deze kaart toont het gemiddelde van de Duurzaamheidsindex per stadsdeel.
 Groene gebieden geven een hogere duurzaamheidsprestatie aan.
 """)
 
-# Gemiddelde Duurzaamheidsindex per Stadsdeel berekenen
-if "Stadsdeel" in gdf.columns:
-    stadsdeel_avg = gdf.dissolve(by="Stadsdeel", aggfunc="mean", as_index=False)
+gdf["Duurzaamheidsindex"] = pd.to_numeric(gdf["Duurzaamheidsindex"], errors="coerce")
 
+# Controleer opnieuw of het type correct is
+print(gdf["Duurzaamheidsindex"].dtype)
+
+# Daarna de berekening opnieuw proberen voor de stadsdelen
+if "Stadsdeel" in gdf.columns:
+    # Bereken het gemiddelde van de Duurzaamheidsindex per Stadsdeel
+    stadsdeel_avg = gdf.dissolve(by="Stadsdeel", aggfunc="mean", as_index=False)
+    
+    # Maak de kaart voor Duurzaamheidsindex per Stadsdeel
     m = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
 
     folium.Choropleth(
