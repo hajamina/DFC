@@ -95,6 +95,42 @@ folium.GeoJson(
 # Kaart weergeven in Streamlit
 st_folium(m, width=800, height=500)
 
+st.subheader("Kaart: Duurzaamheidsindex per Stadsdeel")
+st.markdown("""
+Deze kaart toont het gemiddelde van de Duurzaamheidsindex per stadsdeel.  
+Groene gebieden geven een hogere duurzaamheidsprestatie aan.
+""")
+
+# Gemiddelde Duurzaamheidsindex per Stadsdeel berekenen
+if "Stadsdeel" in gdf.columns:
+    stadsdeel_avg = gdf.dissolve(by="Stadsdeel", aggfunc="mean", as_index=False)
+
+    m = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
+
+    folium.Choropleth(
+        geo_data=stadsdeel_avg,
+        data=stadsdeel_avg,
+        columns=["Stadsdeel", "Duurzaamheidsindex"],
+        key_on="feature.properties.Stadsdeel",
+        fill_color="BuGn",
+        fill_opacity=0.7,
+        line_opacity=0.2,
+        legend_name="Duurzaamheidsindex"
+    ).add_to(m)
+
+    folium.GeoJson(
+        data=stadsdeel_avg,
+        style_function=lambda x: {"fillOpacity": 0, "color": "white", "weight": 0.5},
+        highlight_function=lambda x: {"weight": 2, "color": "blue", "fillOpacity": 0.7},
+        tooltip=folium.GeoJsonTooltip(
+            fields=["Stadsdeel", "Duurzaamheidsindex"],
+            aliases=["Stadsdeel:", "Gemiddelde Duurzaamheidsindex:"],
+            localize=True
+        ),
+    ).add_to(m)
+
+    st_folium(m, width=800, height=500)
+
 from folium.plugins import HeatMap # type: ignore
 
 # Kaart maken
