@@ -48,15 +48,14 @@ Klik op een buurt voor meer details.
 m = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
 
 # Choropleth toevoegen
-choropleth = folium.Choropleth(
+folium.Choropleth(
     geo_data=gdf,
     data=gdf,
     columns=["Buurtcode", "Duurzaamheidsindex"],
     key_on="feature.properties.Buurtcode",
-    fill_color="BuPu",  # Alternatief kleurenschema, meer contrast
-    fill_opacity=0.8,   # Verhoog de dekking
+    fill_color="YlGn",
+    fill_opacity=0.7,
     line_opacity=0.2,
-    bins=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],  # Specifieke intervallen
     legend_name="Duurzaamheidsindex (0-1)"
 ).add_to(m)
 
