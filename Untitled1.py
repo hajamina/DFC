@@ -46,9 +46,7 @@ Klik op een buurt voor meer details.
 """)
 
 m = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
-
-# Choropleth toevoegen
-folium.Choropleth(
+choropleth = folium.Choropleth(
     geo_data=gdf,
     data=gdf,
     columns=["Buurtcode", "Duurzaamheidsindex"],
@@ -59,12 +57,15 @@ folium.Choropleth(
     legend_name="Duurzaamheidsindex (0-1)"
 ).add_to(m)
 
-# Click-popup toevoegen aan de buurten
+# Kleurinformatie van Choropleth ophalen
+choropleth_style = choropleth.geojson
+
+# Click-popup toevoegen aan de buurten zonder kleuren te overschrijven
 def style_function(feature):
     return {
-        "fillOpacity": 0.7,
+        "fillOpacity": 0,  # Laat Choropleth-kleuren intact
         "weight": 0.5,
-        "color": "white"
+        "color": "white"  # Optionele randkleur
     }
 
 def highlight_function(feature):
@@ -75,8 +76,8 @@ def highlight_function(feature):
     }
 
 folium.GeoJson(
-    gdf,
-    style_function=style_function,
+    data=gdf,
+    style_function=style_function,  # Zorgt ervoor dat de Choropleth kleuren behouden blijven
     highlight_function=highlight_function,
     tooltip=folium.GeoJsonTooltip(
         fields=["Buurt", "Duurzaamheidsindex"],
@@ -90,9 +91,6 @@ folium.GeoJson(
         max_width=300
     )
 ).add_to(m)
-
-# Kaart weergeven in Streamlit
-st_folium(m, width=800, height=500)
 
 from folium.plugins import HeatMap # type: ignore
 
