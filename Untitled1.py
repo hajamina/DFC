@@ -92,6 +92,9 @@ folium.GeoJson(
     )
 ).add_to(m)
 
+# Kaart weergeven in Streamlit
+st_folium(m, width=800, height=500)
+
 from folium.plugins import HeatMap # type: ignore
 
 # Kaart maken
