@@ -134,27 +134,73 @@ m.get_root().html.add_child(folium.Element(legend_html))
 # Kaart in Streamlit weergeven
 st_folium(m, width=800, height=500)
 
-# Introductie
-st.subheader("Cluster Map: Locaties van Aardgasvrije Woningequivalenten")
+# Kaart voor aardgasvrije woningequivalenten
+st.subheader("Kaart: Aardgasvrije Woningequivalenten per Buurt")
 st.markdown("""
-Deze kaart toont de locaties van **aardgasvrije woningequivalenten** in Amsterdam.  
-De markers zijn geclusterd om een overzichtelijker beeld te geven.  
-Klik op een cluster of een individuele marker voor meer informatie over het aantal aardgasvrije woningequivalenten in een specifieke buurt.
+Deze kaart toont het aantal **aardgasvrije woningequivalenten** per buurt in Amsterdam.  
+De kleuren geven een indicatie van de mate waarin buurten overgeschakeld zijn op aardgasvrije oplossingen.  
+Klik op een buurt om details te bekijken.
 """)
 
-# Basiskaart
+# Folium kaart maken
 m = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
-marker_cluster = MarkerCluster().add_to(m)
 
-# Markers toevoegen
-for index, row in gdf.iterrows():
-    folium.Marker(
-        location=[row["LAT"], row["LNG"]],
-        popup=f"<b>Buurt:</b> {row['Buurt']}<br><b>Aardgasvrije Equivalenten:</b> {row['aardgasvrije woningequivalenten']}"
-    ).add_to(marker_cluster)
+# Choropleth toevoegen voor aardgasvrije woningequivalenten
+choropleth = folium.Choropleth(
+    geo_data=gdf,
+    data=gdf,
+    columns=["Buurtcode", "aardgasvrije woningequivalenten"],
+    key_on="feature.properties.Buurtcode",
+    fill_color="PuBu",
+    fill_opacity=0.7,
+    line_opacity=0.2,
+    legend_name="Aardgasvrije woningequivalenten"
+).add_to(m)
 
+# Klikbare popups en tooltips toevoegen
+folium.GeoJson(
+    data=gdf,
+    style_function=lambda feature: {
+        "fillOpacity": 0,  # Laat Choropleth-kleuren intact
+        "weight": 0.5,
+        "color": "white"
+    },
+    highlight_function=lambda feature: {
+        "fillOpacity": 1,
+        "weight": 2,
+        "color": "blue"
+    },
+    tooltip=folium.GeoJsonTooltip(
+        fields=["Buurt", "aardgasvrije woningequivalenten"],
+        aliases=["Buurt:", "Aardgasvrije Woningequivalenten:"],
+        localize=True,
+        sticky=False
+    ),
+    popup=folium.GeoJsonPopup(
+        fields=["Buurt", "aardgasvrije woningequivalenten", "Duurzaamheidsindex"],
+        aliases=["Buurt:", "Aardgasvrije Woningequivalenten:", "Duurzaamheidsindex:"],
+        max_width=300
+    )
+).add_to(m)
+
+# Legenda aanpassen
+legend_html = '''
+<div style="position: fixed; 
+            bottom: 10px; left: 10px; width: 250px; height: 120px; 
+            background-color: white; z-index:9999; font-size:14px;
+            border:2px solid grey; border-radius:5px; padding: 10px;">
+    <b>Legenda:</b><br>
+    <i style="background: #edf8fb; width: 20px; height: 10px; display: inline-block; border: 1px solid grey;"></i>
+    Lage concentratie<br>
+    <i style="background: #b2e2e2; width: 20px; height: 10px; display: inline-block; border: 1px solid grey;"></i>
+    Middelhoge concentratie<br>
+    <i style="background: #66c2a4; width: 20px; height: 10px; display: inline-block; border: 1px solid grey;"></i>
+    Hoge concentratie<br>
+    <i style="background: #2ca25f; width: 20px; height: 10px; display: inline-block; border: 1px solid grey;"></i>
+    Zeer hoge concentratie<br>
+</div>
+'''
+m.get_root().html.add_child(folium.Element(legend_html))
 
 # Kaart weergeven in Streamlit
 st_folium(m, width=800, height=500)
-
-
