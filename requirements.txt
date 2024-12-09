@@ -6,4 +6,4 @@ matplotlib
 folium
 numpy
 joblib
-
+streamlit_folium
