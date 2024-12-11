@@ -214,33 +214,58 @@ m.get_root().html.add_child(folium.Element(legend_html))
 st_folium(m, width=800, height=500)
 
 
+
+import streamlit as st
+import folium
+from streamlit_folium import st_folium
+import pandas as pd
+from folium import Choropleth
 gdf1 = gpd.read_file("combined_data1.geojson")
 
+
 st.subheader('Energielabel Kaart: Buurten van Amsterdam')
+
 # Introductie
 st.markdown("""
 Dit dashboard toont een interactieve kaart met informatie over energielabels in verschillende buurten van Amsterdam.
-Elke buurt krijgt een kleur op basis van het percentage energielabel E t/m G.
+Elke buurt krijgt een kleur op basis van het geselecteerde energielabelpercentage.
 Klik op een buurt om meer details te zien.
 """)
 
-# Functie om kleuren te bepalen op basis van percentage energielabel E t/m G
-def determine_color(value):
-    if value > 75:
-        return 'red'
-    elif value > 50:
-        return 'orange'
-    elif value > 25:
-        return 'yellow'
-    else:
-        return 'green'
+# Filteropties voor energielabels
+st.sidebar.header('Filter op energielabel')
+filter_label = st.sidebar.selectbox(
+    'Selecteer energielabel:', 
+    ['E t/m G', 'C t/m D', 'A++++ t/m B']
+)
+# Functie om kleurenschaal te bepalen op basis van waarde
+def determine_color_scale(value, min_value, max_value):
+    # Normaliseer waarde tussen 0 en 1
+    normalized = (value - min_value) / (max_value - min_value)
+    # Converteer naar hex kleur van blauw naar rood (laag naar hoog)
+    r = int(255 * normalized)
+    g = int(255 * (1 - normalized))
+    b = 0
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+# Kolom selecteren op basis van filter
+if filter_label == 'E t/m G':
+    data_column = 'Energielabel E t/m G (%)'
+elif filter_label == 'C t/m D':
+    data_column = 'Energielabel C t/m D (%)'
+else:
+    data_column = 'Energielabel A++++ t/m B (%)'
+
+# Min en max waarden voor kleurenschaal bepalen
+min_value = gdf1[data_column].min()
+max_value = gdf1[data_column].max()
 
 # Folium-kaart maken
-m = folium.Map(location=[52.375, 4.89], zoom_start=14, tiles="CartoDB positron")
+m = folium.Map(location=[52.375, 4.89], zoom_start=12, tiles="CartoDB positron")
 
-# Toevoegen van buurten aan de kaart
+# Toevoegen van buurten als gebieden met kleuren
 for _, row in gdf1.iterrows():
-    color = determine_color(row['Energielabel E t/m G (%)'])
+    color = determine_color_scale(row[data_column], min_value, max_value)
     popup_text = f"""
     <b>Buurt:</b> {row['Buurt']}<br>
     <b>Oppervlakte (m²):</b> {row['Oppervlakte_m2']}<br>
@@ -249,35 +274,19 @@ for _, row in gdf1.iterrows():
     - C t/m D: {row['Energielabel C t/m D (%)']}%<br>
     - A++++ t/m B: {row['Energielabel A++++ t/m B (%)']}%
     """
-    folium.CircleMarker(
-        location=[row['LAT'], row['LNG']],
-        radius=8,
-        color=color,
-        fill=True,
-        fill_color=color,
-        fill_opacity=0.7,
-        popup=popup_text
+    folium.GeoJson(
+        row['geometry'],
+        style_function=lambda x, color=color: {
+            'fillColor': color,
+            'color': 'black',
+            'weight': 0.5,
+            'fillOpacity': 0.7
+        },
+        tooltip=popup_text
     ).add_to(m)
 
 # Streamlit Folium-weergave
 st_data = st_folium(m, width=700, height=500)
 
-# Filteropties voor energielabels
-st.sidebar.header('Filter op energielabel')
-filter_label = st.sidebar.selectbox('Selecteer energielabel:', ['Alle', 'E t/m G', 'C t/m D', 'A++++ t/m B'])
-
-# Filter logica
-def filter_data(label):
-    if label == 'E t/m G':
-        return gdf1.sort_values(by='Energielabel E t/m G (%)', ascending=False)
-    elif label == 'C t/m D':
-        return gdf1.sort_values(by='Energielabel C t/m D (%)', ascending=False)
-    elif label == 'A++++ t/m B':
-        return gdf1.sort_values(by='Energielabel A++++ t/m B (%)', ascending=False)
-    return gdf1
-
-filtered_gdf = filter_data(filter_label)
-
 st.subheader('Geselecteerde buurten')
-st.write(filtered_gdf[['Buurt', 'Energielabel E t/m G (%)', 'Energielabel C t/m D (%)', 'Energielabel A++++ t/m B (%)']])
-
+st.write(gdf1[['Buurt', 'Energielabel E t/m G (%)', 'Energielabel C t/m D (%)', 'Energielabel A++++ t/m B (%)']])
