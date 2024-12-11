@@ -217,18 +217,30 @@ st_folium(m, width=800, height=500)
 gdf1 = gpd.read_file("combined_data1.geojson")
 
 st.subheader('Energielabel Kaart: Buurten van Amsterdam')
-
 # Introductie
 st.markdown("""
 Dit dashboard toont een interactieve kaart met informatie over energielabels in verschillende buurten van Amsterdam.
+Elke buurt krijgt een kleur op basis van het percentage energielabel E t/m G.
 Klik op een buurt om meer details te zien.
 """)
+
+# Functie om kleuren te bepalen op basis van percentage energielabel E t/m G
+def determine_color(value):
+    if value > 75:
+        return 'red'
+    elif value > 50:
+        return 'orange'
+    elif value > 25:
+        return 'yellow'
+    else:
+        return 'green'
 
 # Folium-kaart maken
 m = folium.Map(location=[52.375, 4.89], zoom_start=14, tiles="CartoDB positron")
 
 # Toevoegen van buurten aan de kaart
 for _, row in gdf1.iterrows():
+    color = determine_color(row['Energielabel E t/m G (%)'])
     popup_text = f"""
     <b>Buurt:</b> {row['Buurt']}<br>
     <b>Oppervlakte (m²):</b> {row['Oppervlakte_m2']}<br>
@@ -237,10 +249,14 @@ for _, row in gdf1.iterrows():
     - C t/m D: {row['Energielabel C t/m D (%)']}%<br>
     - A++++ t/m B: {row['Energielabel A++++ t/m B (%)']}%
     """
-    folium.Marker(
+    folium.CircleMarker(
         location=[row['LAT'], row['LNG']],
-        popup=popup_text,
-        icon=folium.Icon(color='blue', icon='info-sign')
+        radius=8,
+        color=color,
+        fill=True,
+        fill_color=color,
+        fill_opacity=0.7,
+        popup=popup_text
     ).add_to(m)
 
 # Streamlit Folium-weergave
