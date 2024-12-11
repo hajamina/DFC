@@ -247,21 +247,3 @@ for _, row in gdf.iterrows():
 # Streamlit Folium-weergave
 st_data = st_folium(m, width=700, height=500)
 
-# Filteropties voor energielabels
-st.sidebar.header('Filter op energielabel')
-filter_label = st.sidebar.selectbox('Selecteer energielabel:', ['Alle', 'E t/m G', 'C t/m D', 'A++++ t/m B'])
-
-# Filter logica
-def filter_data(label):
-    if label == 'E t/m G':
-        return gdf.sort_values(by='Energielabel_E_G', ascending=False)
-    elif label == 'C t/m D':
-        return gdf.sort_values(by='Energielabel_C_D', ascending=False)
-    elif label == 'A++++ t/m B':
-        return gdf.sort_values(by='Energielabel_A_B', ascending=False)
-    return gdf
-
-filtered_gdf = filter_data(filter_label)
-
-st.subheader('Geselecteerde buurten')
-st.write(filtered_gdf[['Buurt', 'Energielabel_E_G', 'Energielabel_C_D', 'Energielabel_A_B']])
