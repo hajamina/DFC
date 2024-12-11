@@ -213,24 +213,62 @@ m.get_root().html.add_child(folium.Element(legend_html))
 # Kaart weergeven in Streamlit
 st_folium(m, width=800, height=500)
 
+import networkx as nx
+from pyvis.network import Network
 
-from math import pi
+st.subheader("Netwerk van buurten op basis van duurzaamheidssimilariteit")
+threshold = st.slider("Selecteer similariteitsdrempel (0-1):", 0.1, 1.0, 0.5)
 
-st.subheader("Duurzaamheidsprofiel van Buurten")
-selected_buurt = st.selectbox("Selecteer een buurt:", gdf["Buurt"])
-buurt_data = gdf[gdf["Buurt"] == selected_buurt].iloc[0]
+# Bereken similariteit (eenvoudig: verschil in Duurzaamheidsindex)
+gdf["similarity"] = gdf["Duurzaamheidsindex"].apply(lambda x: abs(gdf["Duurzaamheidsindex"] - x))
+edges = gdf[gdf["similarity"] < threshold][["Buurt", "Buurtcode", "similarity"]]
 
-categories = ["Duurzaamheidsindex", "Aanbod groen (1-10)", "aardgasvrije woningequivalenten", "aantal_zonnepanelen"]
-values = [buurt_data[cat] for cat in categories]
-values += values[:1]  # Voor cirkel in radarplot
+# Bouw netwerk
+G = nx.Graph()
+for index, row in edges.iterrows():
+    G.add_edge(row["Buurt"], row["Buurtcode"], weight=row["similarity"])
 
-angles = [n / float(len(categories)) * 2 * pi for n in range(len(categories))]
-angles += angles[:1]
+# Visualisatie in Pyvis
+net = Network(notebook=True, height="600px", width="100%")
+net.from_nx(G)
+net.show_buttons(filter_=["physics"])
+st.write(net.show("buurten_netwerk.html"), unsafe_allow_html=True)
 
-fig = plt.figure(figsize=(6, 6))
-ax = fig.add_subplot(111, polar=True)
-plt.xticks(angles[:-1], categories, color="grey", size=8)
-ax.plot(angles, values, linewidth=1, linestyle="solid")
-ax.fill(angles, values, alpha=0.4)
-plt.title(f"Duurzaamheidsprofiel van {selected_buurt}", size=14, color="green")
-st.pyplot(fig)
+
+from streamlit_echarts import st_echarts
+
+st.subheader("Chord Diagram: Relatie Stadsdelen en Variabelen")
+# Data voorbereiden
+nodes = list(gdf["Stadsdeel"].unique())
+links = [{"source": row["Stadsdeel"], "target": "Duurzaamheidsindex", "value": row["Duurzaamheidsindex"]} for _, row in gdf.iterrows()]
+options = {
+    "series": [
+        {
+            "type": "chord",
+            "data": [{"name": node} for node in nodes],
+            "links": links
+        }
+    ]
+}
+st_echarts(options=options)
+
+from sklearn.cluster import DBSCAN
+import geopandas as gpd
+
+st.subheader("Clusters op basis van duurzaamheid")
+coords = gdf[["LAT", "LNG"]]
+db = DBSCAN(eps=0.01, min_samples=5).fit(coords)
+gdf["Cluster"] = db.labels_
+
+# Toon clusters op kaart
+map_cluster = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
+folium.Choropleth(
+    geo_data=gdf,
+    data=gdf,
+    columns=["Buurtcode", "Cluster"],
+    key_on="feature.properties.Buurtcode",
+    fill_color="Set1",
+    legend_name="Clusters"
+).add_to(map_cluster)
+st_folium(map_cluster)
+
