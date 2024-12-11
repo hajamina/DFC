@@ -8,7 +8,4 @@ numpy
 joblib
 streamlit_folium
 geopandas
-networkx
-pyvis.network
-streamlit_echarts
-sklearn.cluster
+
