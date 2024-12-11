@@ -48,10 +48,9 @@ sns.barplot(x=avg_index.values, y=avg_index.index, palette="YlGn")
 plt.title("Gemiddelde Duurzaamheidsindex per Stadsdeel")
 st.pyplot(fig)
 
-st.subheader("Kaart van de Duurzaamheidsindex")
+st.subheader("Duurzaamheidsindex voor Amsterdamse buurten in 2024")
 st.markdown("""
-Deze kaart toont de **Duurzaamheidsindex** voor Amsterdamse buurten in 2024.  
-De kleuren representeren de duurzaamheidsprestaties, waarbij groen een hogere duurzaamheid betekent.
+De kleuren representeren de duurzaamheidsprestaties, waarbij donkergroen een hogere duurzaamheidsindex betekent.
 Klik op een buurt voor meer details.
 """)
 
@@ -213,3 +212,25 @@ m.get_root().html.add_child(folium.Element(legend_html))
 
 # Kaart weergeven in Streamlit
 st_folium(m, width=800, height=500)
+
+
+from math import pi
+
+st.subheader("Duurzaamheidsprofiel van Buurten")
+selected_buurt = st.selectbox("Selecteer een buurt:", gdf["Buurt"])
+buurt_data = gdf[gdf["Buurt"] == selected_buurt].iloc[0]
+
+categories = ["Duurzaamheidsindex", "Aanbod groen (1-10)", "aardgasvrije woningequivalenten", "aantal_zonnepanelen"]
+values = [buurt_data[cat] for cat in categories]
+values += values[:1]  # Voor cirkel in radarplot
+
+angles = [n / float(len(categories)) * 2 * pi for n in range(len(categories))]
+angles += angles[:1]
+
+fig = plt.figure(figsize=(6, 6))
+ax = fig.add_subplot(111, polar=True)
+plt.xticks(angles[:-1], categories, color="grey", size=8)
+ax.plot(angles, values, linewidth=1, linestyle="solid")
+ax.fill(angles, values, alpha=0.4)
+plt.title(f"Duurzaamheidsprofiel van {selected_buurt}", size=14, color="green")
+st.pyplot(fig)
