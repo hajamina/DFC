@@ -10,6 +10,7 @@ from streamlit_folium import st_folium # type: ignore
 import geopandas as gpd # type: ignore
 from folium.plugins import MarkerCluster # type: ignore
 import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np 
 st.markdown("""
     <style>
