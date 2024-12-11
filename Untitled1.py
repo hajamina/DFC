@@ -258,8 +258,10 @@ def filter_data(label):
     elif label == 'C t/m D':
         return gdf.sort_values(by='Energielabel_C_D', ascending=False)
     elif label == 'A++++ t/m B':
+        return gdf.sort_values(by='Energielabel_A_B', ascending=False)
+    return gdf
 
+filtered_gdf = filter_data(filter_label)
 
-
-
-
+st.subheader('Geselecteerde buurten')
+st.write(filtered_gdf[['Buurt', 'Energielabel_E_G', 'Energielabel_C_D', 'Energielabel_A_B']])
