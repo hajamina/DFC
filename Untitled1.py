@@ -213,28 +213,6 @@ m.get_root().html.add_child(folium.Element(legend_html))
 # Kaart weergeven in Streamlit
 st_folium(m, width=800, height=500)
 
-import networkx as nx
-from pyvis.network import Network
-
-st.subheader("Netwerk van buurten op basis van duurzaamheidssimilariteit")
-threshold = st.slider("Selecteer similariteitsdrempel (0-1):", 0.1, 1.0, 0.5)
-
-# Bereken similariteit (eenvoudig: verschil in Duurzaamheidsindex)
-gdf["similarity"] = gdf["Duurzaamheidsindex"].apply(lambda x: abs(gdf["Duurzaamheidsindex"] - x))
-edges = gdf[gdf["similarity"] < threshold][["Buurt", "Buurtcode", "similarity"]]
-
-# Bouw netwerk
-G = nx.Graph()
-for index, row in edges.iterrows():
-    G.add_edge(row["Buurt"], row["Buurtcode"], weight=row["similarity"])
-
-# Visualisatie in Pyvis
-net = Network(notebook=True, height="600px", width="100%")
-net.from_nx(G)
-net.show_buttons(filter_=["physics"])
-st.write(net.show("buurten_netwerk.html"), unsafe_allow_html=True)
-
-
 from streamlit_echarts import st_echarts
 
 st.subheader("Chord Diagram: Relatie Stadsdelen en Variabelen")
