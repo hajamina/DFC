@@ -39,6 +39,13 @@ Gebruik de kaarten en grafieken om trends te ontdekken, buurten te vergelijken, 
 
 gdf = gpd.read_file("output.geojson")
 
+st.subheader("Gemiddelde Duurzaamheidsindex per Stadsdeel")
+avg_index = gdf.groupby("Stadsdeel")["Duurzaamheidsindex"].mean().sort_values()
+fig = plt.figure(figsize=(10, 6))
+sns.barplot(x=avg_index.values, y=avg_index.index, palette="YlGn")
+plt.title("Gemiddelde Duurzaamheidsindex per Stadsdeel")
+st.pyplot(fig)
+
 st.subheader("Kaart van de Duurzaamheidsindex")
 st.markdown("""
 Deze kaart toont de **Duurzaamheidsindex** voor Amsterdamse buurten in 2024.  
@@ -88,7 +95,7 @@ folium.GeoJson(
     ),
     popup=folium.GeoJsonPopup(
         fields=["Buurt", "Duurzaamheidsindex", "Aanbod groen (1-10)", "aardgasvrije woningequivalenten", "aantal_zonnepanelen"],
-        aliases=["Buurt:", "Duurzaamheidsindex:", "Aanbod groen (1-10):", "Aardgasvrije woningen:", "Zonnepanelen:"],
+        aliases=["Buurt:", "Duurzaamheidsindex:", "Aanbod groen (1-10):", "Aardgasvrije woningen(%):", "Aantal Zonnepanelen:"],
         max_width=300
     )
 ).add_to(m)
