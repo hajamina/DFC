@@ -213,40 +213,4 @@ m.get_root().html.add_child(folium.Element(legend_html))
 # Kaart weergeven in Streamlit
 st_folium(m, width=800, height=500)
 
-from streamlit_echarts import st_echarts
-
-st.subheader("Chord Diagram: Relatie Stadsdelen en Variabelen")
-# Data voorbereiden
-nodes = list(gdf["Stadsdeel"].unique())
-links = [{"source": row["Stadsdeel"], "target": "Duurzaamheidsindex", "value": row["Duurzaamheidsindex"]} for _, row in gdf.iterrows()]
-options = {
-    "series": [
-        {
-            "type": "chord",
-            "data": [{"name": node} for node in nodes],
-            "links": links
-        }
-    ]
-}
-st_echarts(options=options)
-
-from sklearn.cluster import DBSCAN
-import geopandas as gpd
-
-st.subheader("Clusters op basis van duurzaamheid")
-coords = gdf[["LAT", "LNG"]]
-db = DBSCAN(eps=0.01, min_samples=5).fit(coords)
-gdf["Cluster"] = db.labels_
-
-# Toon clusters op kaart
-map_cluster = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
-folium.Choropleth(
-    geo_data=gdf,
-    data=gdf,
-    columns=["Buurtcode", "Cluster"],
-    key_on="feature.properties.Buurtcode",
-    fill_color="Set1",
-    legend_name="Clusters"
-).add_to(map_cluster)
-st_folium(map_cluster)
 
