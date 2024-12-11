@@ -213,4 +213,16 @@ m.get_root().html.add_child(folium.Element(legend_html))
 # Kaart weergeven in Streamlit
 st_folium(m, width=800, height=500)
 
+# Visualisatie 4: Interactieve scatterplot voor variabele relaties
+st.header("Relatie tussen variabelen")
+x_var = st.selectbox("Kies X-as variabele", data.columns[2:-1])
+y_var = st.selectbox("Kies Y-as variabele", data.columns[2:-1])
+fig, ax = plt.subplots()
+sns.scatterplot(x=x_var, y=y_var, data=data, hue="Buurt", style="Buurt", ax=ax)
+ax.set_title(f"Relatie tussen {x_var} en {y_var}")
+ax.set_xlabel(x_var)
+ax.set_ylabel(y_var)
+st.pyplot(fig)
+
+
 
