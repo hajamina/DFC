@@ -225,4 +225,52 @@ ax.set_ylabel(y_var)
 st.pyplot(fig)
 
 
+gdf = gpd.read_file("combined_data1.geojson")
+
+
+st.subheader('Energielabel Kaart: Buurten van Amsterdam')
+
+# Introductie
+st.markdown("""
+Dit dashboard toont een interactieve kaart met informatie over energielabels in verschillende buurten van Amsterdam.
+Klik op een buurt om meer details te zien.
+""")
+
+# Folium-kaart maken
+m = folium.Map(location=[52.375, 4.89], zoom_start=14, tiles="CartoDB positron")
+
+# Toevoegen van buurten aan de kaart
+for _, row in gdf.iterrows():
+    popup_text = f"""
+    <b>Buurt:</b> {row['Buurt']}<br>
+    <b>Oppervlakte (m²):</b> {row['Oppervlakte_m2']}<br>
+    <b>Energielabels:</b><br>
+    - E t/m G: {row['Energielabel_E_G']}%<br>
+    - C t/m D: {row['Energielabel_C_D']}%<br>
+    - A++++ t/m B: {row['Energielabel_A_B']}%
+    """
+    folium.Marker(
+        location=[row['LAT'], row['LNG']],
+        popup=popup_text,
+        icon=folium.Icon(color='blue', icon='info-sign')
+    ).add_to(m)
+
+# Streamlit Folium-weergave
+st_data = st_folium(m, width=700, height=500)
+
+# Filteropties voor energielabels
+st.sidebar.header('Filter op energielabel')
+filter_label = st.sidebar.selectbox('Selecteer energielabel:', ['Alle', 'E t/m G', 'C t/m D', 'A++++ t/m B'])
+
+# Filter logica
+def filter_data(label):
+    if label == 'E t/m G':
+        return gdf.sort_values(by='Energielabel_E_G', ascending=False)
+    elif label == 'C t/m D':
+        return gdf.sort_values(by='Energielabel_C_D', ascending=False)
+    elif label == 'A++++ t/m B':
+
+
+
+
 
