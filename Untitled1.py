@@ -131,6 +131,56 @@ HeatMap(
 # Kaart in Streamlit weergeven
 st_folium(m, width=800, height=500)
 
+st.subheader("Correlatie tussen variabelen")
+corr_matrix = gdf[["Duurzaamheidsindex", "aantal_zonnepanelen", "Aanbod groen (1-10)", "aardgasvrije woningequivalenten"]].corr()
+
+fig, ax = plt.subplots(figsize=(8, 6))
+sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f")
+ax.set_title("Correlatiematrix", fontsize=16)
+st.pyplot(fig)
+
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# Clusteranalyse uitvoeren
+features = gdf[["Duurzaamheidsindex", "aantal_zonnepanelen", "Aanbod groen (1-10)"]].fillna(0)
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(features)
+kmeans = KMeans(n_clusters=4, random_state=42).fit(scaled_features)
+
+gdf["Cluster"] = kmeans.labels_
+
+# Folium kaart maken
+cluster_map = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
+colors = ["red", "blue", "green", "purple"]
+
+for _, row in gdf.iterrows():
+    folium.CircleMarker(
+        location=[row["LAT"], row["LNG"]],
+        radius=6,
+        color=colors[row["Cluster"]],
+        fill=True,
+        fill_color=colors[row["Cluster"]],
+        fill_opacity=0.7,
+        popup=f"Buurt: {row['Buurt']}<br>Cluster: {row['Cluster']}"
+    ).add_to(cluster_map)
+
+st.subheader("Clustering van buurten op basis van duurzaamheid")
+st_folium(cluster_map, width=800, height=500)
+
+st.subheader("Verdeling van de Duurzaamheidsindex")
+st.markdown("""
+Deze grafiek laat zien hoe de duurzaamheidsindex is verdeeld over alle buurten van Amsterdam.
+""")
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.histplot(gdf["Duurzaamheidsindex"], kde=True, bins=20, color="teal")
+ax.set_title("Verdeling van de Duurzaamheidsindex", fontsize=16)
+ax.set_xlabel("Duurzaamheidsindex", fontsize=12)
+ax.set_ylabel("Aantal buurten", fontsize=12)
+st.pyplot(fig)
+
+
 # Titel en toelichting
 st.subheader("Visualisatie van Aanbod Groen per Buurt")
 st.markdown(
