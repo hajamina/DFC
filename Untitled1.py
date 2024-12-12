@@ -123,24 +123,42 @@ HeatMap(
     max_zoom=1
 ).add_to(m)
 
-legend_html = '''
-<div style="position: fixed; 
-            bottom: 10px; left: 10px; width: 250px; height: 120px; 
-            background-color: white; z-index:9999; font-size:14px;
-            border:2px solid grey; border-radius:5px; padding: 10px;">
-    <b>Legenda:</b><br>
-    <i style="background: #ffeda0; width: 20px; height: 10px; display: inline-block; border: 1px solid grey;"></i>
-    Hoge concentratie zonnepanelen<br>
-    <i style="background: #feb24c; width: 20px; height: 10px; display: inline-block; border: 1px solid grey;"></i>
-    Middelhoge concentratie<br>
-    <i style="background: #f03b20; width: 20px; height: 10px; display: inline-block; border: 1px solid grey;"></i>
-    Lage concentratie<br>
-</div>
-'''
 m.get_root().html.add_child(folium.Element(legend_html))
 
 # Kaart in Streamlit weergeven
 st_folium(m, width=800, height=500)
+
+
+# Titel en toelichting
+st.subheader("Visualisatie van Aanbod Groen per Buurt")
+st.markdown(
+    """
+    Deze kaart toont het **Aanbod groen (1-10)** per buurt in de stad. Hoe hoger de waarde, 
+    hoe meer groenvoorzieningen aanwezig zijn in de buurt. De cirkels geven de relatieve score 
+    weer, waarbij de grootte en kleur de hoeveelheid aanbod visualiseren.
+    """
+)
+
+# Initiële kaart maken
+m = folium.Map(location=[gdf["LAT"].mean(), gdf["LNG"].mean()], zoom_start=12)
+
+# Voeg cirkelmarkers toe voor elke buurt
+for _, row in gdf.iterrows():
+    CircleMarker(
+        location=[row["LAT"], row["LNG"]],
+        radius=row["Aanbod groen (1-10)"] * 2,  # Schaal de radius
+        color="#4CAF50",  # Groen
+        fill=True,
+        fill_color="#4CAF50",
+        fill_opacity=0.6,
+        tooltip=(
+            f"<b>Buurt:</b> {row['Buurt']}<br>"
+            f"<b>Aanbod groen:</b> {row['Aanbod groen (1-10)']}"
+        ),
+    ).add_to(m)
+
+# Voeg de kaart toe aan Streamlit
+st_data = st_folium(m, width=700, height=500)
 
 # Kaart voor aardgasvrije woningequivalenten
 st.subheader("Kaart: Aardgasvrije Woningequivalenten per Buurt")
