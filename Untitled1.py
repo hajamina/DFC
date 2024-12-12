@@ -195,6 +195,15 @@ for _, row in gdf.iterrows():
 from streamlit.components.v1 import html
 html(m._repr_html_(), width=700, height=500)
 
+import streamlit as st
+import folium
+from folium import Choropleth
+import pandas as pd
+import json
+
+
+
+# Functie om groenaanbod in te delen in categorieën
 def categorize_green_offer(green_value):
     if green_value > 7.5:
         return 'Veel beter dan gemiddeld'
@@ -225,17 +234,22 @@ gdf['Color'] = gdf['Categorie'].apply(lambda x: category_colors[x])
 # Maak de basiskaart
 m = folium.Map(location=[52.3776, 4.9141], zoom_start=12)
 
-# Voeg een Choropleth-kaart toe met aangepaste kleuren
-choropleth = Choropleth(
-    geo_data=gdf,
-    name='Groenaanbod per Buurt',
-    data=gdf,
-    columns=['Buurt', 'Aanbod groen (1-10)'],
-    key_on='feature.properties.Buurt',  # Zorg ervoor dat de buurten overeenkomen
-    fill_color=gdf['Color'],  # Kleuren op basis van de categorie
-    fill_opacity=0.7,
-    line_opacity=0.2,
-    legend_name='Aanbod groen (1-10)'
+# Functie om de kleur van elke buurt in het GeoJSON-bestand toe te passen
+def style_function(feature):
+    buurtnaam = feature['properties']['Buurt']
+    color = gdf[gdf['Buurt'] == buurtnaam]['Color'].values[0]
+    return {
+        'fillColor': color,
+        'color': color,
+        'weight': 0.5,
+        'fillOpacity': 0.7
+    }
+
+# Voeg de geojson-data toe aan de kaart met de stylingfunctie
+folium.GeoJson(
+    gdf,
+    name="Groenaanbod per Buurt",
+    style_function=style_function
 ).add_to(m)
 
 # Voeg een legenda toe (handmatig toegevoegd voor duidelijkheid)
@@ -264,8 +278,6 @@ st.markdown("""
 # We gebruiken streamlit's components om de Folium-kaart weer te geven
 from streamlit.components.v1 import html
 html(m._repr_html_(), width=700, height=500)
-
-
 
 # Kaart voor aardgasvrije woningequivalenten
 st.subheader("Kaart: Aardgasvrije Woningequivalenten per Buurt")
