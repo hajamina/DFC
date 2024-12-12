@@ -8,4 +8,4 @@ numpy
 joblib
 streamlit_folium
 geopandas
-legend_html
+
