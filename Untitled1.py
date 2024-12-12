@@ -125,8 +125,6 @@ HeatMap(
     max_zoom=1
 ).add_to(m)
 
-m.get_root().html.add_child(folium.Element(legend_html))
-
 # Kaart in Streamlit weergeven
 st_folium(m, width=800, height=500)
 
