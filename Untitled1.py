@@ -128,6 +128,60 @@ HeatMap(
 # Kaart in Streamlit weergeven
 st_folium(m, width=800, height=500)
 
+from folium.plugins import MarkerCluster
+from folium import Map, Marker
+from folium.features import CustomIcon
+from folium import Icon
+
+# Maak een MarkerCluster aan
+marker_cluster = MarkerCluster().add_to(m)
+
+# Functie om de vorm te bepalen op basis van groenaanbod
+def get_marker_shape(green_value):
+    """Bepaalt de vorm van de marker op basis van de groenwaarde"""
+    if green_value <= 3:
+        return 'square'   # Laag groenaanbod krijgt een vierkant
+    elif green_value <= 6:
+        return 'triangle'  # Gemiddeld groenaanbod krijgt een driehoek
+    else:
+        return 'circle'    # Hoog groenaanbod krijgt een cirkel
+
+# Functie om de kleur van de marker te bepalen
+def get_marker_color(green_value):
+    """Bepaalt de kleur van de marker op basis van de groenwaarde"""
+    if green_value <= 3:
+        return "red"  # Laag groen = rood
+    elif green_value <= 6:
+        return "orange"  # Gemiddeld groen = oranje
+    else:
+        return "green"  # Hoog groen = groen
+
+# Voeg markers toe aan de cluster
+for _, row in gdf.iterrows():
+    green_value = row["Aanbod groen (1-10)"]
+    
+    # Bepaal de kleur en vorm
+    color = get_marker_color(green_value)
+    shape = get_marker_shape(green_value)
+    
+    # Afhankelijk van de vorm, maak een marker aan
+    if shape == 'square':
+        icon = Icon(color=color, icon='square', prefix='fa')
+    elif shape == 'triangle':
+        icon = Icon(color=color, icon='triangle', prefix='fa')
+    elif shape == 'circle':
+        icon = Icon(color=color, icon='circle', prefix='fa')
+    
+    # Voeg de marker toe aan de cluster
+    Marker(
+        location=[row["LAT"], row["LNG"]],
+        icon=icon,
+        popup=(
+            f"<b>Buurt:</b> {row['Buurt']}<br>"
+            f"<b>Aanbod groen:</b> {row['Aanbod groen (1-10)']}"
+        )
+    ).add_to(marker_cluster)
+
 
 # Titel en toelichting
 st.subheader("Visualisatie van Aanbod Groen per Buurt")
