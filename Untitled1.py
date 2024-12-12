@@ -12,6 +12,7 @@ from folium.plugins import MarkerCluster # type: ignore
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns 
+from folium import Choropleth
 import numpy as np 
 from folium import Icon, Marker
 from folium import CircleMarker
