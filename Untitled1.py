@@ -11,6 +11,7 @@ import geopandas as gpd # type: ignore
 from folium.plugins import MarkerCluster # type: ignore
 import pandas as pd
 import matplotlib.pyplot as plt
+from folium import GeoJson, GeoJsonTooltip
 import seaborn as sns 
 from folium import Choropleth
 import numpy as np 
