@@ -141,6 +141,10 @@ st.pyplot(fig)
 
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
+import folium
+from folium.plugins import FloatImage
+import streamlit as st
+from streamlit_folium import st_folium
 
 # Clusteranalyse uitvoeren
 features = gdf[["Duurzaamheidsindex", "aantal_zonnepanelen", "Aanbod groen (1-10)"]].fillna(0)
@@ -154,6 +158,7 @@ gdf["Cluster"] = kmeans.labels_
 cluster_map = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
 colors = ["red", "blue", "green", "purple"]
 
+# Markers toevoegen
 for _, row in gdf.iterrows():
     folium.CircleMarker(
         location=[row["LAT"], row["LNG"]],
@@ -165,7 +170,34 @@ for _, row in gdf.iterrows():
         popup=f"Buurt: {row['Buurt']}<br>Cluster: {row['Cluster']}"
     ).add_to(cluster_map)
 
+# Legenda toevoegen
+legend_html = """
+<div style="position: fixed; 
+            bottom: 50px; left: 50px; width: 250px; height: 120px; 
+            background-color: white; z-index:9999; font-size:14px; 
+            border:2px solid grey; padding: 10px;">
+    <b>Legenda:</b><br>
+    <span style="color:red;">&#9679;</span> Cluster 0: Lage duurzaamheid, weinig groen<br>
+    <span style="color:blue;">&#9679;</span> Cluster 1: Gemiddelde duurzaamheid, matig zonnepanelen<br>
+    <span style="color:green;">&#9679;</span> Cluster 2: Hoog groenaanbod, weinig zonnepanelen<br>
+    <span style="color:purple;">&#9679;</span> Cluster 3: Hoge duurzaamheid, veel zonnepanelen
+</div>
+"""
+cluster_map.get_root().html.add_child(folium.Element(legend_html))
+
+# Toelichting toevoegen (tekst voor gebruikers)
 st.subheader("Clustering van buurten op basis van duurzaamheid")
+st.markdown("""
+De bovenstaande kaart toont clusters van buurten op basis van duurzaamheidskenmerken:
+- **Duurzaamheidsindex**: Een algemene score van duurzaamheid.
+- **Aantal zonnepanelen**: De hoeveelheid zonnepanelen in de buurt.
+- **Aanbod groen (1-10)**: De hoeveelheid groen in de buurt.
+
+Elke kleur vertegenwoordigt een cluster met buurten die qua duurzaamheidseigenschappen overeenkomen. 
+Gebruik de kaart om patronen te ontdekken en klik op de markers voor meer informatie.
+""")
+
+# Streamlit-kaart tonen
 st_folium(cluster_map, width=800, height=500)
 
 st.subheader("Verdeling van de Duurzaamheidsindex")
