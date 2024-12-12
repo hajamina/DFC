@@ -394,10 +394,10 @@ st.markdown("### Vergelijking van de twee kaarten")
 col1, col2 = st.columns(2)
 
 with col1:
-    st_folium(m1, width=400, height=500)
+    st_folium(m1, width=400, height=500, key="duurzaamheidsindex_kaart")
     st.caption("Duurzaamheidsindexkaart")
 
 with col2:
-    st_folium(m2, width=400, height=500)
+    st_folium(m2, width=400, height=500, key="energielabel_kaart")
     st.caption("Energielabelkaart")
 
