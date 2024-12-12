@@ -129,14 +129,15 @@ HeatMap(
 # Kaart in Streamlit weergeven
 st_folium(m, width=800, height=500)
 
-st.markdown("""
-    Deze kaart toont het groenaanbod in verschillende buurten. 
-    Elke marker heeft een vorm die het groenaanbod reflecteert:
-    - Vierkant voor laag groenaanbod
-    - Driehoek voor gemiddeld groenaanbod
-    - Cirkel voor hoog groenaanbod
-""")
-
+# Titel en toelichting
+st.subheader("Visualisatie van Aanbod Groen per Buurt")
+st.markdown(
+    """
+    Deze kaart toont het **Aanbod groen (1-10)** per buurt in de stad. Hoe hoger de waarde, 
+    hoe meer groenvoorzieningen aanwezig zijn in de buurt. De cirkels geven de relatieve score 
+    weer, waarbij de grootte en kleur de hoeveelheid aanbod visualiseren.
+    """
+)
 
 def get_marker_shape(green_value):
     """Bepaalt de vorm van de marker op basis van de groenwaarde"""
@@ -194,42 +195,84 @@ from streamlit.components.v1 import html
 html(m._repr_html_(), width=700, height=500)
 
 
-# Titel en toelichting
-st.subheader("Visualisatie van Aanbod Groen per Buurt")
-st.markdown(
-    """
-    Deze kaart toont het **Aanbod groen (1-10)** per buurt in de stad. Hoe hoger de waarde, 
-    hoe meer groenvoorzieningen aanwezig zijn in de buurt. De cirkels geven de relatieve score 
-    weer, waarbij de grootte en kleur de hoeveelheid aanbod visualiseren.
-    """
+stedelijk_gemiddelde = 6.9
+
+# Functie om groenaanbod in te delen in categorieën
+def categorize_green_offer(green_value):
+    if green_value > 7.5:
+        return 'Veel beter dan gemiddeld'
+    elif 7.3 <= green_value <= 7.5:
+        return 'Beter dan gemiddeld'
+    elif 6.6 <= green_value <= 7.2:
+        return 'Rond het stedelijk gemiddelde'
+    elif 6.3 <= green_value <= 6.5:
+        return 'Slechter dan gemiddeld'
+    else:
+        return 'Veel slechter dan gemiddeld'
+
+# Pas de functie toe om de buurten te categoriseren
+gdf['Categorie'] = gdf['Aanbod groen (1-10)'].apply(categorize_green_offer)
+
+# Maak een geojson-structuur voor je buurten (geef hier je echte GeoDataFrame of GeoJSON-bestand)
+# Voor nu simuleren we een simpele geojson structuur (vervang dit door je eigen geodata)
+geojson = {
+    "type": "FeatureCollection",
+    "features": [
+        {"type": "Feature", "properties": {"Buurt": "Buurt 1", "Categorie": gdf.loc[0, 'Categorie']}, "geometry": {"type": "Point", "coordinates": [4.9041, 52.3676]}},
+        {"type": "Feature", "properties": {"Buurt": "Buurt 2", "Categorie": gdf.loc[1, 'Categorie']}, "geometry": {"type": "Point", "coordinates": [4.9141, 52.3776]}},
+        {"type": "Feature", "properties": {"Buurt": "Buurt 3", "Categorie": gdf.loc[2, 'Categorie']}, "geometry": {"type": "Point", "coordinates": [4.9241, 52.3576]}},
+        {"type": "Feature", "properties": {"Buurt": "Buurt 4", "Categorie": gdf.loc[3, 'Categorie']}, "geometry": {"type": "Point", "coordinates": [4.9341, 52.3876]}},
+        {"type": "Feature", "properties": {"Buurt": "Buurt 5", "Categorie": gdf.loc[4, 'Categorie']}, "geometry": {"type": "Point", "coordinates": [4.9441, 52.3976]}},
+    ]
+}
+
+# Maak de basiskaart
+m = folium.Map(location=[52.3776, 4.9141], zoom_start=12)
+
+# Voeg een Choropleth-kaart toe
+choropleth = Choropleth(
+    geo_data=geojson,
+    name='Groenaanbod per Buurt',
+    data=gdf,
+    columns=['Buurt', 'Aanbod groen (1-10)'],
+    key_on='feature.properties.Buurt',
+    fill_color='YlGnBu',  # Kleurschema
+    fill_opacity=0.7,
+    line_opacity=0.2,
+    legend_name='Aanbod groen (1-10)'
+).add_to(m)
+
+# Voeg een legenda toe
+choropleth.geojson.add_child(
+    folium.features.GeoJsonTooltip(fields=["Buurt", "Categorie"], aliases=["Buurt", "Groenaanbod Categorie"])
 )
 
-# Initiële kaart maken
-m = folium.Map(location=[gdf["LAT"].mean(), gdf["LNG"].mean()], zoom_start=12)
+# Voeg een legenda voor de kleuren toe
+legend_html = """
+<div style="position: fixed; 
+            bottom: 30px; left: 30px; width: 150px; height: 150px; 
+            border:2px solid grey; background-color:white; z-index:9999;
+            font-size: 12px;">
+    <b>Legenda</b><br>
+    <i style="background: #c2e5f7; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Veel beter dan gemiddeld<br>
+    <i style="background: #66c2a5; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Beter dan gemiddeld<br>
+    <i style="background: #a1dab4; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Rond het stedelijk gemiddelde<br>
+    <i style="background: #fd8d3c; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Slechter dan gemiddeld<br>
+    <i style="background: #f03b20; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Veel slechter dan gemiddeld
+</div>
+"""
+m.get_root().html.add_child(folium.Element(legend_html))
 
-from folium.plugins import MarkerCluster
+# Toon de kaart in Streamlit
+st.title("Visualisatie Groenaanbod per Buurt")
+st.markdown("""
+    Deze kaart toont het groenaanbod in verschillende buurten van 2023. 
+    De kleuren geven aan hoe het groenaanbod zich verhoudt tot het stedelijk gemiddelde van 6.9.
+""")
 
-# Maak een MarkerCluster aan
-marker_cluster = MarkerCluster().add_to(m)
-
-# Voeg cirkelmarkers toe aan de cluster
-for _, row in gdf.iterrows():
-    CircleMarker(
-        location=[row["LAT"], row["LNG"]],
-        radius=row["Aanbod groen (1-10)"] * 2,  # Schaal de radius
-        color="#4CAF50",  # Groen
-        fill=True,
-        fill_color="#4CAF50",
-        fill_opacity=0.6,
-        tooltip=(
-            f"<b>Buurt:</b> {row['Buurt']}<br>"
-            f"<b>Aanbod groen:</b> {row['Aanbod groen (1-10)']}"
-        ),
-    ).add_to(marker_cluster)
-
-# Voeg de kaart toe aan Streamlit
-st_data = st_folium(m, width=700, height=500)
-
+# We gebruiken streamlit's components om de Folium-kaart weer te geven
+from streamlit.components.v1 import html
+html(m._repr_html_(), width=700, height=500)
 # Kaart voor aardgasvrije woningequivalenten
 st.subheader("Kaart: Aardgasvrije Woningequivalenten per Buurt")
 st.markdown("""
