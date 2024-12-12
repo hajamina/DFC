@@ -195,9 +195,6 @@ for _, row in gdf.iterrows():
 from streamlit.components.v1 import html
 html(m._repr_html_(), width=700, height=500)
 
-stedelijk_gemiddelde = 6.9
-
-# Functie om groenaanbod in te delen in categorieën
 def categorize_green_offer(green_value):
     if green_value > 7.5:
         return 'Veel beter dan gemiddeld'
@@ -213,17 +210,29 @@ def categorize_green_offer(green_value):
 # Pas de functie toe om de buurten te categoriseren
 gdf['Categorie'] = gdf['Aanbod groen (1-10)'].apply(categorize_green_offer)
 
+# Maken van een dictionary voor kleuren op basis van de categorische indeling
+category_colors = {
+    'Veel beter dan gemiddeld': 'green',
+    'Beter dan gemiddeld': 'lightgreen',
+    'Rond het stedelijk gemiddelde': 'yellow',
+    'Slechter dan gemiddeld': 'orange',
+    'Veel slechter dan gemiddeld': 'red'
+}
+
+# Voeg de kleur toe aan de DataFrame op basis van de categorie
+gdf['Color'] = gdf['Categorie'].apply(lambda x: category_colors[x])
+
 # Maak de basiskaart
 m = folium.Map(location=[52.3776, 4.9141], zoom_start=12)
 
-# Voeg een Choropleth-kaart toe
+# Voeg een Choropleth-kaart toe met aangepaste kleuren
 choropleth = Choropleth(
     geo_data=gdf,
     name='Groenaanbod per Buurt',
     data=gdf,
     columns=['Buurt', 'Aanbod groen (1-10)'],
     key_on='feature.properties.Buurt',  # Zorg ervoor dat de buurten overeenkomen
-    fill_color='YlGnBu',  # Kleurschema
+    fill_color=gdf['Color'],  # Kleuren op basis van de categorie
     fill_opacity=0.7,
     line_opacity=0.2,
     legend_name='Aanbod groen (1-10)'
@@ -236,17 +245,17 @@ legend_html = """
             border:2px solid grey; background-color:white; z-index:9999;
             font-size: 12px;">
     <b>Legenda</b><br>
-    <i style="background: #c2e5f7; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Veel beter dan gemiddeld<br>
-    <i style="background: #66c2a5; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Beter dan gemiddeld<br>
-    <i style="background: #a1dab4; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Rond het stedelijk gemiddelde<br>
-    <i style="background: #fd8d3c; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Slechter dan gemiddeld<br>
-    <i style="background: #f03b20; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Veel slechter dan gemiddeld
+    <i style="background: green; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Veel beter dan gemiddeld<br>
+    <i style="background: lightgreen; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Beter dan gemiddeld<br>
+    <i style="background: yellow; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Rond het stedelijk gemiddelde<br>
+    <i style="background: orange; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Slechter dan gemiddeld<br>
+    <i style="background: red; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Veel slechter dan gemiddeld
 </div>
 """
 m.get_root().html.add_child(folium.Element(legend_html))
 
 # Toon de kaart in Streamlit
-st.subheader("Visualisatie Groenaanbod per Buurt")
+st.title("Visualisatie Groenaanbod per Buurt")
 st.markdown("""
     Deze kaart toont het groenaanbod in verschillende buurten van 2023. 
     De kleuren geven aan hoe het groenaanbod zich verhoudt tot het stedelijk gemiddelde van 6.9.
