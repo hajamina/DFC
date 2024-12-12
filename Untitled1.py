@@ -176,7 +176,7 @@ for _, row in gdf.iterrows():
             f"Cluster: {row['Cluster']}<br>"
             f"Duurzaamheidsindex: {row['Duurzaamheidsindex']}<br>"
             f"Aantal zonnepanelen: {row['aantal_zonnepanelen']}<br>"
-            f"Aardgasequivalent: {row['aardgasequivalent']}<br>"
+            f"Aardgasequivalent: {row['aardgasvrije woningequivalenten']}<br>"
             f"Aanbod groen: {row['Aanbod groen (1-10)']}"
         )
     ).add_to(cluster_map)
