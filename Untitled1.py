@@ -201,6 +201,107 @@ from folium import Choropleth
 import pandas as pd
 import json
 
+# Functie om groenaanbod in te delen in categorieën
+def categorize_green_offer(green_value):
+    if pd.isna(green_value):  # Als de waarde ontbreekt
+        return 'Geen gegevens'
+    elif green_value > 7.5:
+        return 'Veel beter dan gemiddeld'
+    elif 7.3 <= green_value <= 7.5:
+        return 'Beter dan gemiddeld'
+    elif 6.6 <= green_value <= 7.2:
+        return 'Rond het stedelijk gemiddelde'
+    elif 6.3 <= green_value <= 6.5:
+        return 'Slechter dan gemiddeld'
+    else:
+        return 'Veel slechter dan gemiddeld'
+
+# Pas de functie toe om de buurten te categoriseren
+gdf['Categorie'] = gdf['Aanbod groen (1-10)'].apply(categorize_green_offer)
+
+# Maken van een dictionary voor kleuren op basis van de categorische indeling
+category_colors = {
+    'Veel beter dan gemiddeld': 'green',
+    'Beter dan gemiddeld': 'lightgreen',
+    'Rond het stedelijk gemiddelde': 'yellow',
+    'Slechter dan gemiddeld': 'orange',
+    'Veel slechter dan gemiddeld': 'red',
+    'Geen gegevens': 'white'  # Wit voor ontbrekende gegevens
+}
+
+# Voeg de kleur toe aan de DataFrame op basis van de categorie
+gdf['Color'] = gdf['Categorie'].apply(lambda x: category_colors[x])
+
+# Maak de basiskaart
+m = folium.Map(location=[52.3776, 4.9141], zoom_start=12)
+
+# Functie om de kleur van elke buurt in het GeoJSON-bestand toe te passen
+def style_function(feature):
+    buurtnaam = feature['properties']['Buurt']
+    if buurtnaam in gdf['Buurt'].values:
+        color = gdf[gdf['Buurt'] == buurtnaam]['Color'].values[0]
+    else:
+        color = 'white'  # Wit als de buurt niet in de data zit
+    return {
+        'fillColor': color,
+        'color': 'black',  # Rand van de buurten zwart maken
+        'weight': 0.5,
+        'fillOpacity': 0.7
+    }
+
+# Functie om een pop-up toe te voegen
+def popup_function(feature):
+    buurtnaam = feature['properties']['Buurt']
+    if buurtnaam in gdf['Buurt'].values:
+        waarde = gdf[gdf['Buurt'] == buurtnaam]['Aanbod groen (1-10)'].values[0]
+        return f"<b>{buurtnaam}</b><br>Aanbod groen: {waarde:.1f}"
+    else:
+        return f"<b>{buurtnaam}</b><br>Geen gegevens beschikbaar"
+
+# Voeg de geojson-data toe aan de kaart met de stylingfunctie en pop-up
+geojson = GeoJson(
+    gdf,
+    name="Groenaanbod per Buurt",
+    style_function=style_function,
+    tooltip=GeoJsonTooltip(
+        fields=["Buurt"],
+        aliases=["Buurt:"],
+        sticky=True
+    ),
+    popup=folium.GeoJsonPopup(fields=[], labels=False, parse_html=False)
+)
+geojson.add_child(
+    folium.features.GeoJsonPopup(fields=[], labels=False, parse_html=False)
+)
+geojson.add_to(m)
+
+# Voeg een legenda toe (handmatig toegevoegd voor duidelijkheid)
+legend_html = """
+<div style="position: fixed; 
+            bottom: 30px; left: 30px; width: 250px; height: 180px; 
+            border:2px solid grey; background-color:white; z-index:9999;
+            font-size: 12px; padding: 10px;">
+    <b>Legenda</b><br>
+    <i style="background: green; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Veel beter dan gemiddeld<br>
+    <i style="background: lightgreen; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Beter dan gemiddeld<br>
+    <i style="background: yellow; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Rond het stedelijk gemiddelde<br>
+    <i style="background: orange; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Slechter dan gemiddeld<br>
+    <i style="background: red; width: 20px; height: 20px; display: inline-block; margin-right: 5px;"></i>Veel slechter dan gemiddeld<br>
+    <i style="background: white; width: 20px; height: 20px; display: inline-block; margin-right: 5px; border: 1px solid black;"></i>Geen gegevens<br>
+</div>
+"""
+m.get_root().html.add_child(folium.Element(legend_html))
+
+# Toon de kaart in Streamlit
+st.title("Visualisatie Groenaanbod per Buurt")
+st.markdown("""
+    Deze kaart toont het groenaanbod in verschillende buurten van 2023. 
+    De kleuren geven aan hoe het groenaanbod zich verhoudt tot het stedelijk gemiddelde van 6.9.
+""")
+
+# Gebruik Streamlit's components om de Folium-kaart weer te geven
+from streamlit.components.v1 import html
+html(m._repr_html_(), width=800, height=600)
 
 
 # Functie om groenaanbod in te delen in categorieën
