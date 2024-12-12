@@ -185,7 +185,6 @@ legend_html = """
     <span style="color:purple;">&#9679;</span> Cluster 3: Hoge duurzaamheid, veel zonnepanelen
 </div>
 """
-cluster_map.get_root().html.add_child(folium.Element(legend_html))
 
 # Toelichting toevoegen (tekst voor gebruikers)
 st.subheader("Clustering van buurten op basis van duurzaamheid")
@@ -200,7 +199,8 @@ Gebruik de kaart om patronen te ontdekken en klik op de markers voor meer inform
 """)
 
 # Streamlit-kaart tonen
-st_folium(cluster_map, width=800, height=500)
+folium_html = cluster_map._repr_html_() + legend_html  # Voeg kaart en legenda samen
+html(folium_html, width=800, height=600)
 
 st.subheader("Verdeling van de Duurzaamheidsindex")
 st.markdown("""
