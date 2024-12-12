@@ -128,15 +128,15 @@ HeatMap(
 # Kaart in Streamlit weergeven
 st_folium(m, width=800, height=500)
 
-from folium.plugins import MarkerCluster
-from folium import Map, Marker
-from folium.features import CustomIcon
-from folium import Icon
+st.markdown("""
+    Deze kaart toont het groenaanbod in verschillende buurten. 
+    Elke marker heeft een vorm die het groenaanbod reflecteert:
+    - Vierkant voor laag groenaanbod
+    - Driehoek voor gemiddeld groenaanbod
+    - Cirkel voor hoog groenaanbod
+""")
 
-# Maak een MarkerCluster aan
-marker_cluster = MarkerCluster().add_to(m)
 
-# Functie om de vorm te bepalen op basis van groenaanbod
 def get_marker_shape(green_value):
     """Bepaalt de vorm van de marker op basis van de groenwaarde"""
     if green_value <= 3:
@@ -146,7 +146,7 @@ def get_marker_shape(green_value):
     else:
         return 'circle'    # Hoog groenaanbod krijgt een cirkel
 
-# Functie om de kleur van de marker te bepalen
+# Functie om de kleur van de marker te bepalen op basis van groenaanbod
 def get_marker_color(green_value):
     """Bepaalt de kleur van de marker op basis van de groenwaarde"""
     if green_value <= 3:
@@ -155,6 +155,12 @@ def get_marker_color(green_value):
         return "orange"  # Gemiddeld groen = oranje
     else:
         return "green"  # Hoog groen = groen
+
+# Maak de Folium-kaart aan
+m = folium.Map(location=[52.3776, 4.9141], zoom_start=12)
+
+# Maak een MarkerCluster aan
+marker_cluster = MarkerCluster().add_to(m)
 
 # Voeg markers toe aan de cluster
 for _, row in gdf.iterrows():
@@ -181,6 +187,10 @@ for _, row in gdf.iterrows():
             f"<b>Aanbod groen:</b> {row['Aanbod groen (1-10)']}"
         )
     ).add_to(marker_cluster)
+
+# We gebruiken streamlit's components om de Folium-kaart weer te geven
+from streamlit.components.v1 import html
+html(m._repr_html_(), width=700, height=500)
 
 
 # Titel en toelichting
