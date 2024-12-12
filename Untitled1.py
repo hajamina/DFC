@@ -148,7 +148,7 @@ from streamlit_folium import st_folium
 from streamlit.components.v1 import html
 
 # Data preprocessing
-features = gdf[["Duurzaamheidsindex", "aantal_zonnepanelen", "aardgasequivalent", "Aanbod groen (1-10)"]].fillna(0)
+features = gdf[["Duurzaamheidsindex", "aantal_zonnepanelen", "aardgasvrije woningequivalenten", "Aanbod groen (1-10)"]].fillna(0)
 
 # Schalen van de gegevens
 scaler = StandardScaler()
