@@ -134,13 +134,20 @@ HeatMap(
 st_folium(m, width=800, height=500)
 
 st.subheader("Correlatie tussen variabelen")
+
+# Correlatiematrix berekenen
 corr_matrix = gdf[["Duurzaamheidsindex", "aantal_zonnepanelen", "Aanbod groen (1-10)", "aardgasvrije woningequivalenten"]].corr()
 
-fig, ax = plt.subplots(figsize=(8, 6))
-sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f")
-ax.set_title("Correlatiematrix", fontsize=16)
-st.pyplot(fig)
+# Mask genereren voor de bovenste driehoek
+mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
 
+# Plotten
+fig, ax = plt.subplots(figsize=(8, 6))
+sns.heatmap(corr_matrix, mask=mask, annot=True, cmap="coolwarm", fmt=".2f", cbar_kws={'shrink': .8})
+ax.set_title("Halve Correlatiematrix", fontsize=16)
+
+# Streamlit plot
+st.pyplot(fig)
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import folium
