@@ -6,6 +6,8 @@
 
 import streamlit as st # type: ignore
 import folium # type: ignore
+from streamlit.components.v1 import html
+
 from streamlit_folium import st_folium # type: ignore
 import geopandas as gpd # type: ignore
 from folium.plugins import MarkerCluster # type: ignore
