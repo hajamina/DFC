@@ -181,23 +181,17 @@ for _, row in gdf.iterrows():
         )
     ).add_to(cluster_map)
 
-# Legenda aanpassen voor 8 clusters
-legend_html = """
-<div style="position: fixed; 
-            bottom: 50px; left: 50px; width: 350px; height: 220px; 
-            background-color: white; z-index:9999; font-size:14px; 
-            border:2px solid grey; padding: 10px;">
-    <b>Legenda:</b><br>
-    <span style="color:red;">&#9679;</span> Cluster 0: Hoge aardgasequivalent, veel zonnepanelen, groot groen aanbod<br>
-    <span style="color:blue;">&#9679;</span> Cluster 1: Lage aardgasequivalent, weinig zonnepanelen, groot groen aanbod<br>
-    <span style="color:green;">&#9679;</span> Cluster 2: Gemiddelde aardgasequivalent, veel zonnepanelen, weinig groen aanbod<br>
-    <span style="color:purple;">&#9679;</span> Cluster 3: Hoge aardgasequivalent, weinig zonnepanelen, weinig groen aanbod<br>
-    <span style="color:orange;">&#9679;</span> Cluster 4: Hoge duurzaamheid, veel zonnepanelen, groot groen aanbod<br>
-    <span style="color:pink;">&#9679;</span> Cluster 5: Gemiddelde duurzaamheid, matig zonnepanelen, gemiddeld groen aanbod<br>
-    <span style="color:cyan;">&#9679;</span> Cluster 6: Lage duurzaamheid, weinig zonnepanelen, weinig groen aanbod<br>
-    <span style="color:yellow;">&#9679;</span> Cluster 7: Gemiddelde aardgasequivalent, matig zonnepanelen, groot groen aanbod<br>
-</div>
-"""
+st.markdown("""
+### Legenda
+- <span style="color:red;">&#9679;</span> **Cluster 0**: Hoge aardgasequivalent, veel zonnepanelen, groot groen aanbod  
+- <span style="color:blue;">&#9679;</span> **Cluster 1**: Lage aardgasequivalent, weinig zonnepanelen, groot groen aanbod  
+- <span style="color:green;">&#9679;</span> **Cluster 2**: Gemiddelde aardgasequivalent, veel zonnepanelen, weinig groen aanbod  
+- <span style="color:purple;">&#9679;</span> **Cluster 3**: Hoge aardgasequivalent, weinig zonnepanelen, weinig groen aanbod  
+- <span style="color:orange;">&#9679;</span> **Cluster 4**: Hoge duurzaamheid, veel zonnepanelen, groot groen aanbod  
+- <span style="color:pink;">&#9679;</span> **Cluster 5**: Gemiddelde duurzaamheid, matig zonnepanelen, gemiddeld groen aanbod  
+- <span style="color:cyan;">&#9679;</span> **Cluster 6**: Lage duurzaamheid, weinig zonnepanelen, weinig groen aanbod  
+- <span style="color:yellow;">&#9679;</span> **Cluster 7**: Gemiddelde aardgasequivalent, matig zonnepanelen, groot groen aanbod  
+""", unsafe_allow_html=True)
 
 # Toelichting toevoegen (tekst voor gebruikers)
 st.subheader("Clustering van buurten op basis van duurzaamheid")
@@ -214,8 +208,7 @@ Gebruik de kaart om patronen te ontdekken en klik op de markers voor meer inform
 """)
 
 # Streamlit-kaart met legenda
-folium_html = cluster_map._repr_html_() + legend_html  # Voeg kaart en legenda samen
-html(folium_html, width=800, height=600)
+st_folium(cluster_map, width=800, height=500)
 
 st.subheader("Verdeling van de Duurzaamheidsindex")
 st.markdown("""
