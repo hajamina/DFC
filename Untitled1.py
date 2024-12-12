@@ -181,6 +181,9 @@ for _, row in gdf.iterrows():
         )
     ).add_to(cluster_map)
 
+# Streamlit-kaart met legenda
+st_folium(cluster_map, width=800, height=500)
+
 st.markdown("""
 ### Legenda
 - <span style="color:red;">&#9679;</span> **Cluster 0**: Hoge aardgasequivalent, veel zonnepanelen, groot groen aanbod  
@@ -207,8 +210,6 @@ De clusters zijn zo ingedeeld dat telkens een specifieke combinatie van factoren
 Gebruik de kaart om patronen te ontdekken en klik op de markers voor meer informatie.
 """)
 
-# Streamlit-kaart met legenda
-st_folium(cluster_map, width=800, height=500)
 
 st.subheader("Verdeling van de Duurzaamheidsindex")
 st.markdown("""
