@@ -144,23 +144,25 @@ st.pyplot(fig)
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import folium
-from folium.plugins import FloatImage
-import streamlit as st
 from streamlit_folium import st_folium
+from streamlit.components.v1 import html
 
-# Clusteranalyse uitvoeren
-features = gdf[["Duurzaamheidsindex", "aantal_zonnepanelen", "Aanbod groen (1-10)"]].fillna(0)
+# Data preprocessing
+features = gdf[["Duurzaamheidsindex", "aantal_zonnepanelen", "aardgasequivalent", "Aanbod groen (1-10)"]].fillna(0)
+
+# Schalen van de gegevens
 scaler = StandardScaler()
 scaled_features = scaler.fit_transform(features)
-kmeans = KMeans(n_clusters=4, random_state=42).fit(scaled_features)
 
+# Clustering uitvoeren met meer clusters
+kmeans = KMeans(n_clusters=8, random_state=42).fit(scaled_features)  # Meer clusters
 gdf["Cluster"] = kmeans.labels_
 
 # Folium kaart maken
 cluster_map = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
-colors = ["red", "blue", "green", "purple"]
+colors = ["red", "blue", "green", "purple", "orange", "pink", "cyan", "yellow"]  # Meer kleuren voor clusters
 
-# Markers toevoegen
+# Markers toevoegen aan de kaart
 for _, row in gdf.iterrows():
     folium.CircleMarker(
         location=[row["LAT"], row["LNG"]],
@@ -169,23 +171,33 @@ for _, row in gdf.iterrows():
         fill=True,
         fill_color=colors[row["Cluster"]],
         fill_opacity=0.7,
-        popup=f"Buurt: {row['Buurt']}<br>Cluster: {row['Cluster']}"
+        popup=(
+            f"Buurt: {row['Buurt']}<br>"
+            f"Cluster: {row['Cluster']}<br>"
+            f"Duurzaamheidsindex: {row['Duurzaamheidsindex']}<br>"
+            f"Aantal zonnepanelen: {row['aantal_zonnepanelen']}<br>"
+            f"Aardgasequivalent: {row['aardgasequivalent']}<br>"
+            f"Aanbod groen: {row['Aanbod groen (1-10)']}"
+        )
     ).add_to(cluster_map)
 
-# Legenda toevoegen
+# Legenda aanpassen voor 8 clusters
 legend_html = """
 <div style="position: fixed; 
-            bottom: 50px; left: 50px; width: 250px; height: 120px; 
+            bottom: 50px; left: 50px; width: 350px; height: 220px; 
             background-color: white; z-index:9999; font-size:14px; 
             border:2px solid grey; padding: 10px;">
     <b>Legenda:</b><br>
-    <span style="color:red;">&#9679;</span> Cluster 0: Lage duurzaamheid, weinig groen<br>
-    <span style="color:blue;">&#9679;</span> Cluster 1: Gemiddelde duurzaamheid, matig zonnepanelen<br>
-    <span style="color:green;">&#9679;</span> Cluster 2: Hoog groenaanbod, weinig zonnepanelen<br>
-    <span style="color:purple;">&#9679;</span> Cluster 3: Hoge duurzaamheid, veel zonnepanelen
+    <span style="color:red;">&#9679;</span> Cluster 0: Hoge aardgasequivalent, veel zonnepanelen, groot groen aanbod<br>
+    <span style="color:blue;">&#9679;</span> Cluster 1: Lage aardgasequivalent, weinig zonnepanelen, groot groen aanbod<br>
+    <span style="color:green;">&#9679;</span> Cluster 2: Gemiddelde aardgasequivalent, veel zonnepanelen, weinig groen aanbod<br>
+    <span style="color:purple;">&#9679;</span> Cluster 3: Hoge aardgasequivalent, weinig zonnepanelen, weinig groen aanbod<br>
+    <span style="color:orange;">&#9679;</span> Cluster 4: Hoge duurzaamheid, veel zonnepanelen, groot groen aanbod<br>
+    <span style="color:pink;">&#9679;</span> Cluster 5: Gemiddelde duurzaamheid, matig zonnepanelen, gemiddeld groen aanbod<br>
+    <span style="color:cyan;">&#9679;</span> Cluster 6: Lage duurzaamheid, weinig zonnepanelen, weinig groen aanbod<br>
+    <span style="color:yellow;">&#9679;</span> Cluster 7: Gemiddelde aardgasequivalent, matig zonnepanelen, groot groen aanbod<br>
 </div>
 """
-
 
 # Toelichting toevoegen (tekst voor gebruikers)
 st.subheader("Clustering van buurten op basis van duurzaamheid")
@@ -193,13 +205,15 @@ st.markdown("""
 De bovenstaande kaart toont clusters van buurten op basis van duurzaamheidskenmerken:
 - **Duurzaamheidsindex**: Een algemene score van duurzaamheid.
 - **Aantal zonnepanelen**: De hoeveelheid zonnepanelen in de buurt.
+- **Aardgasequivalent**: Een maat voor gasgebruik in de buurt.
 - **Aanbod groen (1-10)**: De hoeveelheid groen in de buurt.
 
 Elke kleur vertegenwoordigt een cluster met buurten die qua duurzaamheidseigenschappen overeenkomen. 
+De clusters zijn zo ingedeeld dat telkens een specifieke combinatie van factoren wordt belicht.
 Gebruik de kaart om patronen te ontdekken en klik op de markers voor meer informatie.
 """)
 
-# Streamlit-kaart tonen
+# Streamlit-kaart met legenda
 folium_html = cluster_map._repr_html_() + legend_html  # Voeg kaart en legenda samen
 html(folium_html, width=800, height=600)
 
