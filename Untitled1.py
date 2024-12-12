@@ -147,8 +147,19 @@ import folium
 from streamlit_folium import st_folium
 from streamlit.components.v1 import html
 
-# Data preprocessing
 features = gdf[["Duurzaamheidsindex", "aantal_zonnepanelen", "aardgasvrije woningequivalenten", "Aanbod groen (1-10)"]].fillna(0)
+st.subheader("Clustering van buurten op basis van duurzaamheid")
+st.markdown("""
+De bovenstaande kaart toont clusters van buurten op basis van duurzaamheidskenmerken:
+- **Duurzaamheidsindex**: Een algemene score van duurzaamheid.
+- **Aantal zonnepanelen**: De hoeveelheid zonnepanelen in de buurt.
+- **Aardgasequivalent**: Een maat voor gasgebruik in de buurt.
+- **Aanbod groen (1-10)**: De hoeveelheid groen in de buurt.
+
+Elke kleur vertegenwoordigt een cluster met buurten die qua duurzaamheidseigenschappen overeenkomen. 
+De clusters zijn zo ingedeeld dat telkens een specifieke combinatie van factoren wordt belicht.
+Gebruik de kaart om patronen te ontdekken en klik op de markers voor meer informatie.
+""")
 
 # Schalen van de gegevens
 scaler = StandardScaler()
@@ -181,9 +192,9 @@ for _, row in gdf.iterrows():
         )
     ).add_to(cluster_map)
 
-# Streamlit-kaart met legenda
 st_folium(cluster_map, width=800, height=500)
 
+# Legenda onder de kaart
 st.markdown("""
 ### Legenda
 - <span style="color:red;">&#9679;</span> **Cluster 0**: Hoge aardgasequivalent, veel zonnepanelen, groot groen aanbod  
@@ -196,19 +207,6 @@ st.markdown("""
 - <span style="color:yellow;">&#9679;</span> **Cluster 7**: Gemiddelde aardgasequivalent, matig zonnepanelen, groot groen aanbod  
 """, unsafe_allow_html=True)
 
-# Toelichting toevoegen (tekst voor gebruikers)
-st.subheader("Clustering van buurten op basis van duurzaamheid")
-st.markdown("""
-De bovenstaande kaart toont clusters van buurten op basis van duurzaamheidskenmerken:
-- **Duurzaamheidsindex**: Een algemene score van duurzaamheid.
-- **Aantal zonnepanelen**: De hoeveelheid zonnepanelen in de buurt.
-- **Aardgasequivalent**: Een maat voor gasgebruik in de buurt.
-- **Aanbod groen (1-10)**: De hoeveelheid groen in de buurt.
-
-Elke kleur vertegenwoordigt een cluster met buurten die qua duurzaamheidseigenschappen overeenkomen. 
-De clusters zijn zo ingedeeld dat telkens een specifieke combinatie van factoren wordt belicht.
-Gebruik de kaart om patronen te ontdekken en klik op de markers voor meer informatie.
-""")
 
 
 st.subheader("Verdeling van de Duurzaamheidsindex")
