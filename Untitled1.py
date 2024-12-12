@@ -292,12 +292,6 @@ st.markdown(
     "Deze kaarten kunnen worden vergeleken om inzicht te krijgen in de relatie tussen energielabels en de algemene duurzaamheidsindex."
 )
 
-# --- Kaart 1: Duurzaamheidsindex ---
-st.subheader("Duurzaamheidsindex voor Amsterdamse buurten in 2024")
-st.markdown(
-    "De kleuren representeren de duurzaamheidsprestaties, waarbij donkergroen een hogere duurzaamheidsindex betekent. "
-    "Klik op een buurt voor meer details."
-)
 
 m1 = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
 choropleth = folium.Choropleth(
@@ -342,12 +336,6 @@ folium.GeoJson(
     )
 ).add_to(m1)
 
-# --- Kaart 2: Energielabels ---
-st.subheader("Dominante Energielabels per buurt")
-st.markdown(
-    "Deze kaart laat de dominante energielabels zien per buurt, met kleuren die variëren van groen (hoogste labels: A++++ t/m B) "
-    "tot rood (laagste labels: E t/m G)."
-)
 
 # Grootste aandeel bepalen
 def determine_dominant_label(row):
