@@ -218,7 +218,7 @@ m = folium.Map(location=[52.3776, 4.9141], zoom_start=12)
 
 # Voeg een Choropleth-kaart toe
 choropleth = Choropleth(
-    geo_data=geojson_data,
+    geo_data=gdf,
     name='Groenaanbod per Buurt',
     data=gdf,
     columns=['Buurt', 'Aanbod groen (1-10)'],
