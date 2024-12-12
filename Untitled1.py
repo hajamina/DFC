@@ -200,8 +200,7 @@ Gebruik de kaart om patronen te ontdekken en klik op de markers voor meer inform
 """)
 
 # Streamlit-kaart tonen
-folium_html = cluster_map._repr_html_() + legend_html  # Voeg kaart en legenda samen
-html(folium_html, width=800, height=600)
+st_folium(cluster_map, width=800, height=500)
 
 st.subheader("Verdeling van de Duurzaamheidsindex")
 st.markdown("""
