@@ -280,3 +280,124 @@ st.markdown(
     "De rode buurten hebben het grootste aandeel woningen met een laag energielabel (E t/m G). "
     "Deze visualisatie helpt om inzicht te krijgen in de duurzaamheid van buurten binnen Amsterdam."
 )
+
+
+# Titel en introductie
+st.subheader("Vergelijking van duurzaamheid in Amsterdamse buurten")
+
+st.markdown(
+    "Hieronder worden twee kaarten weergegeven: \n"
+    "1. **Duurzaamheidsindexkaart**: Toont de algemene duurzaamheidsprestaties per buurt in 2024. \n"
+    "2. **Energielabelkaart**: Geeft het dominante energielabel in elke buurt weer. \n"
+    "Deze kaarten kunnen worden vergeleken om inzicht te krijgen in de relatie tussen energielabels en de algemene duurzaamheidsindex."
+)
+
+# --- Kaart 1: Duurzaamheidsindex ---
+st.subheader("Duurzaamheidsindex voor Amsterdamse buurten in 2024")
+st.markdown(
+    "De kleuren representeren de duurzaamheidsprestaties, waarbij donkergroen een hogere duurzaamheidsindex betekent. "
+    "Klik op een buurt voor meer details."
+)
+
+m1 = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
+choropleth = folium.Choropleth(
+    geo_data=gdf,
+    data=gdf,
+    columns=["Buurtcode", "Duurzaamheidsindex"],
+    key_on="feature.properties.Buurtcode",
+    fill_color="YlGn",
+    fill_opacity=0.7,
+    line_opacity=0.2,
+    legend_name="Duurzaamheidsindex (0-1)"
+).add_to(m1)
+
+def style_function(feature):
+    return {
+        "fillOpacity": 0,  # Laat Choropleth-kleuren intact
+        "weight": 0.5,
+        "color": "white"  # Optionele randkleur
+    }
+
+def highlight_function(feature):
+    return {
+        "fillOpacity": 1,
+        "weight": 2,
+        "color": "blue"
+    }
+
+folium.GeoJson(
+    data=gdf,
+    style_function=style_function,  # Zorgt ervoor dat de Choropleth kleuren behouden blijven
+    highlight_function=highlight_function,
+    tooltip=folium.GeoJsonTooltip(
+        fields=["Buurt", "Duurzaamheidsindex"],
+        aliases=["Buurt:", "Duurzaamheidsindex:"],
+        localize=True,
+        sticky=False
+    ),
+    popup=folium.GeoJsonPopup(
+        fields=["Buurt", "Duurzaamheidsindex", "Aanbod groen (1-10)", "aardgasvrije woningequivalenten", "aantal_zonnepanelen"],
+        aliases=["Buurt:", "Duurzaamheidsindex:", "Aanbod groen (1-10):", "Aardgasvrije woningen(%):", "Aantal Zonnepanelen:"],
+        max_width=300
+    )
+).add_to(m1)
+
+# --- Kaart 2: Energielabels ---
+st.subheader("Dominante Energielabels per buurt")
+st.markdown(
+    "Deze kaart laat de dominante energielabels zien per buurt, met kleuren die variëren van groen (hoogste labels: A++++ t/m B) "
+    "tot rood (laagste labels: E t/m G)."
+)
+
+# Grootste aandeel bepalen
+def determine_dominant_label(row):
+    labels = {
+        "A++++ t/m B": row["Energielabel A++++ t/m B (%)"],
+        "C t/m D": row["Energielabel C t/m D (%)"],
+        "E t/m G": row["Energielabel E t/m G (%)"],
+    }
+    return max(labels, key=labels.get)
+
+gdf1["Dominant_Label"] = gdf1.apply(determine_dominant_label, axis=1)
+
+# Kleuren toewijzen op basis van dominant label
+color_mapping = {
+    "A++++ t/m B": "#2ecc71",  # Groen
+    "C t/m D": "#f1c40f",      # Geel
+    "E t/m G": "#e74c3c",      # Rood
+}
+
+gdf1["Color"] = gdf1["Dominant_Label"].map(color_mapping)
+
+m2 = folium.Map(location=[52.3676, 4.9041], zoom_start=12)
+
+for _, row in gdf1.iterrows():
+    folium.GeoJson(
+        row.geometry,
+        style_function=lambda feature, color=row["Color"]: {
+            "fillColor": color,
+            "color": "black",
+            "weight": 0.5,
+            "fillOpacity": 0.6,
+        },
+        tooltip=(
+            f"<b>Buurt:</b> {row['Buurt']}<br>"
+            f"<b>Dominant label:</b> {row['Dominant_Label']}<br>"
+            f"<b>A++++ t/m B:</b> {row['Energielabel A++++ t/m B (%)']}%<br>"
+            f"<b>C t/m D:</b> {row['Energielabel C t/m D (%)']}%<br>"
+            f"<b>E t/m G:</b> {row['Energielabel E t/m G (%)']}%"
+        ),
+    ).add_to(m2)
+
+# --- Beide kaarten naast elkaar weergeven ---
+st.markdown("### Vergelijking van de twee kaarten")
+col1, col2 = st.columns(2)
+
+with col1:
+    st_folium(m1, width=400, height=500)
+    st.caption("Duurzaamheidsindexkaart")
+
+with col2:
+    st_folium(m2, width=400, height=500)
+    st.caption("Energielabelkaart")
+
