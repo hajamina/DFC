@@ -220,73 +220,63 @@ import folium
 from streamlit_folium import st_folium
 import pandas as pd
 from folium import Choropleth
+from branca.colormap import linear
+
 gdf1 = gpd.read_file("combined_data1.geojson")
-
-
 st.subheader('Energielabel Kaart: Buurten van Amsterdam')
-
-# Introductie
-st.markdown("""
-Dit dashboard toont een interactieve kaart met informatie over energielabels in verschillende buurten van Amsterdam.
-Elke buurt krijgt een kleur op basis van het geselecteerde energielabelpercentage.
-Klik op een buurt om meer details te zien.
-""")
-
-# Filteropties voor energielabels
-st.sidebar.header('Filter op energielabel')
-filter_label = st.sidebar.selectbox(
-    'Selecteer energielabel:', 
-    ['E t/m G', 'C t/m D', 'A++++ t/m B']
+st.markdown(
+    "Deze kaart laat de duurzaamheidsniveaus van Amsterdamse buurten zien, gebaseerd op energielabels. "
+    "De kleuren variëren van **groen** (hoog aandeel energielabel A++++ t/m B) tot **rood** (hoog aandeel energielabel E t/m G). "
+    "Dit geeft inzicht in de duurzaamheid van verschillende buurten en kan helpen bij verdere stadsplanning en verduurzaming."
 )
-# Functie om kleurenschaal te bepalen op basis van waarde
-def determine_color_scale(value, min_value, max_value):
-    # Normaliseer waarde tussen 0 en 1
-    normalized = (value - min_value) / (max_value - min_value)
-    # Converteer naar hex kleur van blauw naar rood (laag naar hoog)
-    r = int(255 * normalized)
-    g = int(255 * (1 - normalized))
-    b = 0
-    return f"#{r:02x}{g:02x}{b:02x}"
 
-# Kolom selecteren op basis van filter
-if filter_label == 'E t/m G':
-    data_column = 'Energielabel E t/m G (%)'
-elif filter_label == 'C t/m D':
-    data_column = 'Energielabel C t/m D (%)'
-else:
-    data_column = 'Energielabel A++++ t/m B (%)'
+# Grootste aandeel bepalen
+def determine_dominant_label(row):
+    labels = {
+        "A++++ t/m B": row["Energielabel A++++ t/m B (%)"],
+        "C t/m D": row["Energielabel C t/m D (%)"],
+        "E t/m G": row["Energielabel E t/m G (%)"],
+    }
+    return max(labels, key=labels.get)
 
-# Min en max waarden voor kleurenschaal bepalen
-min_value = gdf1[data_column].min()
-max_value = gdf1[data_column].max()
+gdf1["Dominant_Label"] = gdf1.apply(determine_dominant_label, axis=1)
 
-# Folium-kaart maken
-m = folium.Map(location=[52.375, 4.89], zoom_start=12, tiles="CartoDB positron")
+# Kleuren toewijzen op basis van dominant label
+color_mapping = {
+    "A++++ t/m B": "#2ecc71",  # Groen
+    "C t/m D": "#f1c40f",      # Geel
+    "E t/m G": "#e74c3c",      # Rood
+}
 
-# Toevoegen van buurten als gebieden met kleuren
+gdf1["Color"] = gdf1["Dominant_Label"].map(color_mapping)
+
+# Folium kaart genereren
+m = folium.Map(location=[52.3676, 4.9041], zoom_start=12)
+
 for _, row in gdf1.iterrows():
-    color = determine_color_scale(row[data_column], min_value, max_value)
-    popup_text = f"""
-    <b>Buurt:</b> {row['Buurt']}<br>
-    <b>Oppervlakte (m²):</b> {row['Oppervlakte_m2']}<br>
-    <b>Energielabels:</b><br>
-    - E t/m G: {row['Energielabel E t/m G (%)']}%<br>
-    - C t/m D: {row['Energielabel C t/m D (%)']}%<br>
-    - A++++ t/m B: {row['Energielabel A++++ t/m B (%)']}%
-    """
     folium.GeoJson(
-        row['geometry'],
-        style_function=lambda x, color=color: {
-            'fillColor': color,
-            'color': 'black',
-            'weight': 0.5,
-            'fillOpacity': 0.7
+        row.geometry,
+        style_function=lambda feature, color=row["Color"]: {
+            "fillColor": color,
+            "color": "black",
+            "weight": 0.5,
+            "fillOpacity": 0.6,
         },
-        tooltip=popup_text
+        tooltip=(
+            f"<b>Buurt:</b> {row['Buurt']}<br>"
+            f"<b>Dominant label:</b> {row['Dominant_Label']}<br>"
+            f"<b>A++++ t/m B:</b> {row['Energielabel A++++ t/m B (%)']}%<br>"
+            f"<b>C t/m D:</b> {row['Energielabel C t/m D (%)']}%<br>"
+            f"<b>E t/m G:</b> {row['Energielabel E t/m G (%)']}%"
+        ),
     ).add_to(m)
 
-# Streamlit Folium-weergave
-st_data = st_folium(m, width=700, height=500)
+# Kaart weergeven
+st_folium(m, width=800, height=600)
 
-st.subheader('Geselecteerde buurten')
-st.write(gdf1[['Buurt', 'Energielabel E t/m G (%)', 'Energielabel C t/m D (%)', 'Energielabel A++++ t/m B (%)']])
+# Conclusie
+st.markdown(
+    "**Hoe te interpreteren:** De buurten met een groene kleur hebben het grootste aandeel woningen met een hoog energielabel (A++++ t/m B). "
+    "De rode buurten hebben het grootste aandeel woningen met een laag energielabel (E t/m G). "
+    "Deze visualisatie helpt om inzicht te krijgen in de duurzaamheid van buurten binnen Amsterdam."
+)
