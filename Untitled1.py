@@ -142,7 +142,12 @@ st.markdown(
 # Initiële kaart maken
 m = folium.Map(location=[gdf["LAT"].mean(), gdf["LNG"].mean()], zoom_start=12)
 
-# Voeg cirkelmarkers toe voor elke buurt
+from folium.plugins import MarkerCluster
+
+# Maak een MarkerCluster aan
+marker_cluster = MarkerCluster().add_to(m)
+
+# Voeg cirkelmarkers toe aan de cluster
 for _, row in gdf.iterrows():
     CircleMarker(
         location=[row["LAT"], row["LNG"]],
@@ -155,7 +160,7 @@ for _, row in gdf.iterrows():
             f"<b>Buurt:</b> {row['Buurt']}<br>"
             f"<b>Aanbod groen:</b> {row['Aanbod groen (1-10)']}"
         ),
-    ).add_to(m)
+    ).add_to(marker_cluster)
 
 # Voeg de kaart toe aan Streamlit
 st_data = st_folium(m, width=700, height=500)
