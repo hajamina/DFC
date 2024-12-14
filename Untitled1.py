@@ -41,9 +41,9 @@ Deze interactieve applicatie presenteert de resultaten van mijn onderzoek naar d
 
 De index combineert verschillende indicatoren, zoals:
 
-- **Groene aanbod**
-- **Aardgasvrije woningen**
-- **Aantal zonnepanelen**
+- **Groene aanbod**: Een schaal van 1 tot 10 die de hoeveelheid groen in een buurt weergeeft.  
+- **Aardgasvrije woningen**: Het percentage woningen dat aardgasvrij is.  
+- **Aantal zonnepanelen**: Het totale aantal zonnepanelen in een buurt.
 
 Met deze visualisaties krijgt u inzicht in hoe buurten presteren op het gebied van duurzaamheid en hoe deze data stedenbouwkundig beleid kan ondersteunen.
 
