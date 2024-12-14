@@ -46,12 +46,40 @@ De index combineert verschillende indicatoren, zoals:
 - **Aantal zonnepanelen**: Het totale aantal zonnepanelen in een buurt.
 
 Met deze visualisaties krijgt u inzicht in hoe buurten presteren op het gebied van duurzaamheid en hoe deze data stedenbouwkundig beleid kan ondersteunen.
-
-Gebruik de kaarten en grafieken om trends te ontdekken, buurten te vergelijken, en strategische inzichten te verkrijgen voor een duurzamer Amsterdam!
 """, unsafe_allow_html=True)
 
 
 gdf = gpd.read_file("output.geojson")
+
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
+# Data voorbereiden vanuit jouw GeoDataFrame
+# Let op: Als je een GeoDataFrame gebruikt, moet dit eerst een reguliere DataFrame worden.
+data = gdf[['Buurt', 'Aanbod groen (1-10)', 'aardgasvrije woningequivalenten', 'aantal_zonnepanelen']].copy()
+
+# Hernoem kolommen voor betere labels in de grafiek
+data.rename(columns={
+    'Aanbod groen (1-10)': 'Groene aanbod',
+    'aardgasvrije woningequivalenten': 'Aardgasvrije woningen (%)',
+    'aantal_zonnepanelen': 'Aantal zonnepanelen'
+}, inplace=True)
+
+# Zet de data in een geschikt formaat voor Plotly (melt voor lange vorm)
+data_melted = data.melt(id_vars='Buurt', var_name='Indicator', value_name='Waarde')
+
+# Plotly staafdiagram
+fig = px.bar(
+    data_melted,
+    x='Buurt', y='Waarde', color='Indicator',
+    barmode='group',
+    title='Vergelijking van Indicatoren per Buurt',
+    labels={'Waarde': 'Waarde', 'Buurt': 'Buurt', 'Indicator': 'Indicator'}
+)
+
+# Toon de grafiek in Streamlit
+st.plotly_chart(fig)
 
 st.subheader("Gemiddelde Duurzaamheidsindex per Stadsdeel")
 avg_index = gdf.groupby("Stadsdeel")["Duurzaamheidsindex"].mean().sort_values()
