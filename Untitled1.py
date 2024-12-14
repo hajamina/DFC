@@ -55,28 +55,29 @@ import pandas as pd
 import plotly.express as px
 
 # Data voorbereiden vanuit jouw GeoDataFrame
-data = gdf[['Buurt', 'Groeneaanbod_normalized', 'Aardgasvrije_normalized', 'Zonnepanelen_normalized', 'Duurzaamheidsindex']].copy()
+data = gdf[['Buurt', 'Aanbod groen (1-10)', 'aardgasvrije woningequivalenten', 'aantal_zonnepanelen', 'Duurzaamheidsindex']].copy()
 
 # Hernoem kolommen voor betere labels in de grafiek
 data.rename(columns={
-    'Groeneaanbod_normalized': 'Groene aanbod',
-    'Aardgasvrije_normalized': 'Aardgasvrije woningen',
-    'Zonnepanelen_normalized': 'Aantal zonnepanelen'
+    'Aanbod groen (1-10)': 'Groene aanbod',
+    'aardgasvrije woningequivalenten': 'Aardgasvrije woningen (%)',
+    'aantal_zonnepanelen': 'Aantal zonnepanelen'
 }, inplace=True)
 
 # Selecteer top 5 buurten op basis van de Duurzaamheidsindex
 top_5 = data.nlargest(5, 'Duurzaamheidsindex')
 
 # Zet de data in een geschikt formaat voor Plotly (melt voor lange vorm)
-data_melted = top_5.melt(id_vars='Buurt', var_name='Indicator', value_name='Genormaliseerde Waarde')
+data_melted = top_5.melt(id_vars='Buurt', var_name='Indicator', value_name='Waarde')
 
-# Plotly staafdiagram
+# Maak een FacetGrid met een aparte grafiek voor elke indicator
 fig = px.bar(
     data_melted,
-    x='Buurt', y='Genormaliseerde Waarde', color='Indicator',
-    barmode='group',
-    title='Vergelijking van Genormaliseerde Indicatoren voor Top 5 Buurten',
-    labels={'Genormaliseerde Waarde': 'Waarde', 'Buurt': 'Buurt', 'Indicator': 'Indicator'}
+    x='Buurt', y='Waarde', facet_col='Indicator', color='Buurt',
+    title='Vergelijking van Indicatoren voor Top 5 Buurten',
+    labels={'Waarde': 'Waarde', 'Buurt': 'Buurt', 'Indicator': 'Indicator'},
+    facet_col_wrap=1,  # Elke indicator in een eigen rij
+    height=800  # Pas de hoogte aan zodat alles goed zichtbaar is
 )
 
 # Toon de grafiek in Streamlit
