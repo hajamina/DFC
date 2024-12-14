@@ -32,19 +32,24 @@ st.markdown("""
     <h1 class="title">Duurzaamheidsindex Amsterdam 2024</h1>
     """, unsafe_allow_html=True)
 
+import streamlit as st
+
+# Geef de tekst in Markdown weer
 st.markdown("""
-Welkom bij de **Duurzaamheidsatlas van Amsterdam (2024)**!  
-Deze interactieve applicatie presenteert de resultaten van mijn onderzoek naar de **Duurzaamheidsindex**, een samengestelde maat die de duurzaamheid van Amsterdamse buurten meet.  
 
-De index combineert verschillende indicatoren, zoals:  
-- **Groene aanbod** (A++++ tot B)  
-- **Aardgasvrije woningen**  
-- **Aantal zonnepanelen**  
+Deze interactieve applicatie presenteert de resultaten van mijn onderzoek naar de **Duurzaamheidsindex**, een samengestelde maat die de duurzaamheid van Amsterdamse buurten meet.
 
-Met deze visualisaties krijgt u inzicht in hoe buurten presteren op het gebied van duurzaamheid en hoe deze data stedenbouwkundig beleid kan ondersteunen.  
+De index combineert verschillende indicatoren, zoals:
+
+- **Groene aanbod**
+- **Aardgasvrije woningen**
+- **Aantal zonnepanelen**
+
+Met deze visualisaties krijgt u inzicht in hoe buurten presteren op het gebied van duurzaamheid en hoe deze data stedenbouwkundig beleid kan ondersteunen.
 
 Gebruik de kaarten en grafieken om trends te ontdekken, buurten te vergelijken, en strategische inzichten te verkrijgen voor een duurzamer Amsterdam!
-""")
+""", unsafe_allow_html=True)
+
 
 gdf = gpd.read_file("output.geojson")
 
