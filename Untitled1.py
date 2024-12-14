@@ -50,6 +50,7 @@ Met deze visualisaties krijgt u inzicht in hoe buurten presteren op het gebied v
 
 
 gdf = gpd.read_file("output.geojson")
+
 import streamlit as st
 import pandas as pd
 import plotly.subplots as sp
@@ -120,7 +121,6 @@ fig.update_layout(
 
 # Toon de grafiek in Streamlit
 st.plotly_chart(fig)
-
 
 st.subheader("Duurzaamheidsindex voor Amsterdamse buurten in 2024")
 st.markdown("""
