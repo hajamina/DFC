@@ -50,74 +50,13 @@ Met deze visualisaties krijgt u inzicht in hoe buurten presteren op het gebied v
 
 
 gdf = gpd.read_file("output.geojson")
-import streamlit as st
-import pandas as pd
-import plotly.subplots as sp
-import plotly.graph_objects as go
 
-# Data voorbereiden vanuit jouw GeoDataFrame
-data = gdf[['Buurt', 'Aanbod groen (1-10)', 'aardgasvrije woningequivalenten', 'aantal_zonnepanelen', 'Duurzaamheidsindex']].copy()
-
-# Hernoem kolommen voor betere labels
-data.rename(columns={
-    'Aanbod groen (1-10)': 'Groene aanbod',
-    'aardgasvrije woningequivalenten': 'Aardgasvrije woningen (%)',
-    'aantal_zonnepanelen': 'Aantal zonnepanelen'
-}, inplace=True)
-
-# Sorteer de buurten op de hoogste Duurzaamheidsindex en selecteer de top 20
-top_20 = data.sort_values(by='Duurzaamheidsindex', ascending=False).head(20)
-
-# Maak een lege subplot met aparte rijen voor elke indicator
-fig = sp.make_subplots(
-    rows=3, cols=1,  # 3 subplots in één kolom
-    shared_xaxes=True,  # De x-as wordt gedeeld (Buurt)
-    subplot_titles=('Groene aanbod', 'Aardgasvrije woningen (%)', 'Aantal zonnepanelen')
-)
-
-# Voeg Groene aanbod toe aan de eerste subplot
-fig.add_trace(
-    go.Bar(
-        x=top_20['Buurt'],
-        y=top_20['Groene aanbod'],
-        name='Groene aanbod',
-        marker=dict(color='green')
-    ),
-    row=1, col=1
-)
-
-# Voeg Aardgasvrije woningen toe aan de tweede subplot
-fig.add_trace(
-    go.Bar(
-        x=top_20['Buurt'],
-        y=top_20['Aardgasvrije woningen (%)'],
-        name='Aardgasvrije woningen (%)',
-        marker=dict(color='blue')
-    ),
-    row=2, col=1
-)
-
-# Voeg Aantal zonnepanelen toe aan de derde subplot
-fig.add_trace(
-    go.Bar(
-        x=top_20['Buurt'],
-        y=top_20['Aantal zonnepanelen'],
-        name='Aantal zonnepanelen',
-        marker=dict(color='orange')
-    ),
-    row=3, col=1
-)
-
-# Pas de layout aan
-fig.update_layout(
-    title_text='Vergelijking van Indicatoren voor de Top 20 Buurten (Hoogste Duurzaamheidsindex)',
-    height=1200,  # Hoogte aanpassen voor leesbaarheid
-    showlegend=False,  # Legenda verbergen, niet nodig voor aparte subplots
-    xaxis=dict(title='Buurt')  # Label voor de x-as
-)
-
-# Toon de grafiek in Streamlit
-st.plotly_chart(fig)
+st.subheader("Gemiddelde Duurzaamheidsindex per Stadsdeel")
+avg_index = gdf.groupby("Stadsdeel")["Duurzaamheidsindex"].mean().sort_values()
+fig = plt.figure(figsize=(10, 6))
+sns.barplot(x=avg_index.values, y=avg_index.index, palette="YlGn")
+plt.title("Gemiddelde Duurzaamheidsindex per Stadsdeel")
+st.pyplot(fig)
 
 st.subheader("Duurzaamheidsindex voor Amsterdamse buurten in 2024")
 st.markdown("""
@@ -212,6 +151,77 @@ ax.set_title("Halve Correlatiematrix", fontsize=16)
 
 # Streamlit plot
 st.pyplot(fig)
+
+import streamlit as st
+import pandas as pd
+import plotly.subplots as sp
+import plotly.graph_objects as go
+
+# Data voorbereiden vanuit jouw GeoDataFrame
+data = gdf[['Buurt', 'Aanbod groen (1-10)', 'aardgasvrije woningequivalenten', 'aantal_zonnepanelen', 'Duurzaamheidsindex']].copy()
+
+# Hernoem kolommen voor betere labels
+data.rename(columns={
+    'Aanbod groen (1-10)': 'Groene aanbod',
+    'aardgasvrije woningequivalenten': 'Aardgasvrije woningen (%)',
+    'aantal_zonnepanelen': 'Aantal zonnepanelen'
+}, inplace=True)
+
+# Sorteer de buurten op de hoogste Duurzaamheidsindex en selecteer de top 20
+top_20 = data.sort_values(by='Duurzaamheidsindex', ascending=False).head(20)
+
+# Maak een lege subplot met aparte rijen voor elke indicator
+fig = sp.make_subplots(
+    rows=3, cols=1,  # 3 subplots in één kolom
+    shared_xaxes=True,  # De x-as wordt gedeeld (Buurt)
+    subplot_titles=('Groene aanbod', 'Aardgasvrije woningen (%)', 'Aantal zonnepanelen')
+)
+
+# Voeg Groene aanbod toe aan de eerste subplot
+fig.add_trace(
+    go.Bar(
+        x=top_20['Buurt'],
+        y=top_20['Groene aanbod'],
+        name='Groene aanbod',
+        marker=dict(color='green')
+    ),
+    row=1, col=1
+)
+
+# Voeg Aardgasvrije woningen toe aan de tweede subplot
+fig.add_trace(
+    go.Bar(
+        x=top_20['Buurt'],
+        y=top_20['Aardgasvrije woningen (%)'],
+        name='Aardgasvrije woningen (%)',
+        marker=dict(color='blue')
+    ),
+    row=2, col=1
+)
+
+# Voeg Aantal zonnepanelen toe aan de derde subplot
+fig.add_trace(
+    go.Bar(
+        x=top_20['Buurt'],
+        y=top_20['Aantal zonnepanelen'],
+        name='Aantal zonnepanelen',
+        marker=dict(color='orange')
+    ),
+    row=3, col=1
+)
+
+# Pas de layout aan
+fig.update_layout(
+    title_text='Vergelijking van Indicatoren voor de Top 20 Buurten (Hoogste Duurzaamheidsindex)',
+    height=1200,  # Hoogte aanpassen voor leesbaarheid
+    showlegend=False,  # Legenda verbergen, niet nodig voor aparte subplots
+    xaxis=dict(title='Buurt')  # Label voor de x-as
+)
+
+# Toon de grafiek in Streamlit
+st.plotly_chart(fig)
+
+
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import folium
