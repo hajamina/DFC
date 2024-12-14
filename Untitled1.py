@@ -68,11 +68,12 @@ data.rename(columns={
 # Sorteer de buurten op de hoogste Duurzaamheidsindex en selecteer de top 20
 top_20 = data.sort_values(by='Duurzaamheidsindex', ascending=False).head(20)
 
-# Maak een lege subplot met aparte rijen voor elke indicator
+# Maak een lege subplot met aparte kolommen voor elke indicator (3 kolommen)
 fig = sp.make_subplots(
-    rows=3, cols=1,  # 3 subplots in één kolom
-    shared_xaxes=True,  # De x-as wordt gedeeld (Buurt)
-    subplot_titles=('Groene aanbod', 'Aardgasvrije woningen (%)', 'Aantal zonnepanelen')
+    rows=1, cols=3,  # 1 rij en 3 kolommen
+    shared_yaxes=True,  # De y-as wordt gedeeld (zodat het makkelijker is om te vergelijken)
+    subplot_titles=('Groene aanbod', 'Aardgasvrije woningen (%)', 'Aantal zonnepanelen'),
+    horizontal_spacing=0.1  # Ruimte tussen de grafieken aanpassen
 )
 
 # Voeg Groene aanbod toe aan de eerste subplot
@@ -94,7 +95,7 @@ fig.add_trace(
         name='Aardgasvrije woningen (%)',
         marker=dict(color='blue')
     ),
-    row=2, col=1
+    row=1, col=2
 )
 
 # Voeg Aantal zonnepanelen toe aan de derde subplot
@@ -105,19 +106,21 @@ fig.add_trace(
         name='Aantal zonnepanelen',
         marker=dict(color='orange')
     ),
-    row=3, col=1
+    row=1, col=3
 )
 
 # Pas de layout aan
 fig.update_layout(
     title_text='Vergelijking van Indicatoren voor de Top 20 Buurten (Hoogste Duurzaamheidsindex)',
-    height=1200,  # Hoogte aanpassen voor leesbaarheid
+    height=800,  # Hoogte aanpassen voor leesbaarheid
     showlegend=False,  # Legenda verbergen, niet nodig voor aparte subplots
-    xaxis=dict(title='Buurt')  # Label voor de x-as
+    xaxis=dict(title='Buurt'),  # Label voor de x-as
+    yaxis=dict(title='Waarde')  # Label voor de y-as
 )
 
 # Toon de grafiek in Streamlit
 st.plotly_chart(fig)
+
 
 st.subheader("Duurzaamheidsindex voor Amsterdamse buurten in 2024")
 st.markdown("""
