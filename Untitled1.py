@@ -50,9 +50,6 @@ Met deze visualisaties krijgt u inzicht in hoe buurten presteren op het gebied v
 
 
 gdf = gpd.read_file("output.geojson")
-
-import streamlit as st
-import pandas as pd
 import plotly.express as px
 
 # Data voorbereiden vanuit jouw GeoDataFrame
