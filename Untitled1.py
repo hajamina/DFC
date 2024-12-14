@@ -55,33 +55,32 @@ import pandas as pd
 import plotly.express as px
 
 # Data voorbereiden vanuit jouw GeoDataFrame
-data = gdf[['Buurt', 'Aanbod groen (1-10)', 'aardgasvrije woningequivalenten', 'aantal_zonnepanelen', 'Duurzaamheidsindex']].copy()
+data = gdf[['Buurt', 'Groeneaanbod_normalized', 'Aardgasvrije_normalized', 'Zonnepanelen_normalized', 'Duurzaamheidsindex']].copy()
 
 # Hernoem kolommen voor betere labels in de grafiek
 data.rename(columns={
-    'Aanbod groen (1-10)': 'Groene aanbod',
-    'aardgasvrije woningequivalenten': 'Aardgasvrije woningen (%)',
-    'aantal_zonnepanelen': 'Aantal zonnepanelen'
+    'Groeneaanbod_normalized': 'Groene aanbod',
+    'Aardgasvrije_normalized': 'Aardgasvrije woningen',
+    'Zonnepanelen_normalized': 'Aantal zonnepanelen'
 }, inplace=True)
 
 # Selecteer top 5 buurten op basis van de Duurzaamheidsindex
 top_5 = data.nlargest(5, 'Duurzaamheidsindex')
 
 # Zet de data in een geschikt formaat voor Plotly (melt voor lange vorm)
-data_melted = top_5.melt(id_vars='Buurt', var_name='Indicator', value_name='Waarde')
+data_melted = top_5.melt(id_vars='Buurt', var_name='Indicator', value_name='Genormaliseerde Waarde')
 
 # Plotly staafdiagram
 fig = px.bar(
     data_melted,
-    x='Buurt', y='Waarde', color='Indicator',
+    x='Buurt', y='Genormaliseerde Waarde', color='Indicator',
     barmode='group',
-    title='Vergelijking van Indicatoren voor Top 5 Buurten',
-    labels={'Waarde': 'Waarde', 'Buurt': 'Buurt', 'Indicator': 'Indicator'}
+    title='Vergelijking van Genormaliseerde Indicatoren voor Top 5 Buurten',
+    labels={'Genormaliseerde Waarde': 'Waarde', 'Buurt': 'Buurt', 'Indicator': 'Indicator'}
 )
 
 # Toon de grafiek in Streamlit
 st.plotly_chart(fig)
-
 
 st.subheader("Gemiddelde Duurzaamheidsindex per Stadsdeel")
 avg_index = gdf.groupby("Stadsdeel")["Duurzaamheidsindex"].mean().sort_values()
