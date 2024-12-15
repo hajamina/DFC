@@ -170,6 +170,17 @@ data.rename(columns={
 
 # Sorteer de buurten op de hoogste Duurzaamheidsindex en selecteer de top 20
 top_20 = data.sort_values(by='Duurzaamheidsindex', ascending=False).head(20)
+# Bereken de interquartile range (IQR) voor 'Aantal zonnepanelen'
+q1 = top_20['Aantal zonnepanelen'].quantile(0.25)
+q3 = top_20['Aantal zonnepanelen'].quantile(0.75)
+iqr = q3 - q1
+
+# Stel een drempel vast voor het detecteren van uitschieters
+lower_bound = q1 - 1.5 * iqr
+upper_bound = q3 + 1.5 * iqr
+
+# Filter de data om alleen rijen zonder uitschieters te behouden
+filtered_top_20 = top_20[(top_20['Aantal zonnepanelen'] >= lower_bound) & (top_20['Aantal zonnepanelen'] <= upper_bound)]
 
 # Maak een lege subplot met aparte rijen voor elke indicator
 fig = sp.make_subplots(
@@ -200,14 +211,13 @@ fig.add_trace(
     row=2, col=1
 )
 
-# Voeg Aantal zonnepanelen toe aan de derde subplot
+# Voeg Aantal zonnepanelen toe aan de derde subplot met gefilterde data
 fig.add_trace(
     go.Bar(
-        x=top_20['Buurt'],
-        y=top_20['Aantal zonnepanelen'],
+        x=filtered_top_20['Buurt'],
+        y=filtered_top_20['Aantal zonnepanelen'],
         name='Aantal zonnepanelen',
-        marker=dict(color='orange',
-        showfliers = False)
+        marker=dict(color='orange')
     ),
     row=3, col=1
 )
