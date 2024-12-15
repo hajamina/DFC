@@ -220,7 +220,7 @@ fig.update_layout(
 )
 
 # Toon de grafiek in Streamlit
-st.plotly_chart(fig).
+st.plotly_chart(fig)
 
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
