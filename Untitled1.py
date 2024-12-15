@@ -51,13 +51,6 @@ Met deze visualisaties krijgt u inzicht in hoe buurten presteren op het gebied v
 
 gdf = gpd.read_file("output.geojson")
 
-st.subheader("Gemiddelde Duurzaamheidsindex per Stadsdeel")
-avg_index = gdf.groupby("Stadsdeel")["Duurzaamheidsindex"].mean().sort_values()
-fig = plt.figure(figsize=(10, 6))
-sns.barplot(x=avg_index.values, y=avg_index.index, palette="YlGn")
-plt.title("Gemiddelde Duurzaamheidsindex per Stadsdeel")
-st.pyplot(fig)
-
 st.subheader("Duurzaamheidsindex voor Amsterdamse buurten in 2024")
 st.markdown("""
 De kleuren representeren de duurzaamheidsprestaties, waarbij donkergroen een hogere duurzaamheidsindex betekent.
@@ -113,13 +106,21 @@ folium.GeoJson(
 
 # Kaart weergeven in Streamlit
 st_folium(m, width=800, height=500)
+
+st.subheader("Gemiddelde Duurzaamheidsindex per Stadsdeel")
+st.markdown("""De grafiek toont hoe verschillende stadsdelen van Amsterdam scoren op de duurzaamheidsindex""")
+avg_index = gdf.groupby("Stadsdeel")["Duurzaamheidsindex"].mean().sort_values()
+fig = plt.figure(figsize=(10, 6))
+sns.barplot(x=avg_index.values, y=avg_index.index, palette="YlGn")
+st.pyplot(fig)
+
 from folium.plugins import HeatMap # type: ignore
 
 # Kaart maken
 st.subheader("Warmtekaart: Concentratie van Zonnepanelen")
 st.markdown("""
-Deze warmtekaart visualiseert de concentratie van zonnepanelen in Amsterdam.  
-Donkere gebieden representeren een lagere dichtheid, terwijl lichtere gebieden een hogere concentratie zonnepanelen tonen.
+De warmtekaart toont de concentratie van zonnepanelen in Amsterdam.
+Gebieden met een hogere dichtheid van zonnepanelen zijn duidelijk zichtbaar als rode en oranje hotspots, terwijl blauwe gebieden minder zonnepanelen hebben.
 """)
 
 m = folium.Map(location=[52.3728, 4.8936], zoom_start=12)
@@ -136,7 +137,7 @@ HeatMap(
 # Kaart in Streamlit weergeven
 st_folium(m, width=800, height=500)
 
-st.subheader("Correlatie tussen variabelen")
+st.subheader("Correlatie tussen duurzaamheidindex en de drie indicatoren")
 
 # Correlatiematrix berekenen
 corr_matrix = gdf[["Duurzaamheidsindex", "aantal_zonnepanelen", "Aanbod groen (1-10)", "aardgasvrije woningequivalenten"]].corr()
@@ -205,7 +206,8 @@ fig.add_trace(
         x=top_20['Buurt'],
         y=top_20['Aantal zonnepanelen'],
         name='Aantal zonnepanelen',
-        marker=dict(color='orange')
+        marker=dict(color='orange',
+        showfliers = False)
     ),
     row=3, col=1
 )
