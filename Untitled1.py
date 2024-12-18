@@ -160,7 +160,7 @@ import plotly.graph_objects as go
 
 # Data voorbereiden vanuit jouw GeoDataFrame
 data = gdf[['Buurt', 'Aanbod groen (1-10)', 'aardgasvrije woningequivalenten', 'aantal_zonnepanelen', 'Duurzaamheidsindex']].copy()
-
+st.subheader("Vergelijking van Indicatoren voor de Top 20 Buurten (Hoogste Duurzaamheidsindex)")
 # Hernoem kolommen voor betere labels
 data.rename(columns={
     'Aanbod groen (1-10)': 'Groene aanbod',
@@ -213,7 +213,6 @@ fig.add_trace(
 
 # Pas de layout aan
 fig.update_layout(
-    title_text='Vergelijking van Indicatoren voor de Top 20 Buurten (Hoogste Duurzaamheidsindex)',
     height=1200,  # Hoogte aanpassen voor leesbaarheid
     showlegend=False,  # Legenda verbergen, niet nodig voor aparte subplots
     xaxis=dict(title='Buurt')  # Label voor de x-as
