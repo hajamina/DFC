@@ -51,7 +51,7 @@ Met deze visualisaties krijgt u inzicht in hoe buurten presteren op het gebied v
 
 gdf = gpd.read_file("output.geojson")
 
-st.subheader("Duurzaamheidsindex voor Amsterdamse buurten in 2024")
+st.subheader("Duurzaamheidsindex per Buurt in Amsterdam")
 st.markdown("""
 De kleuren representeren de duurzaamheidsprestaties, waarbij donkergroen een hogere duurzaamheidsindex betekent.
 Klik op een buurt voor meer details.
@@ -464,7 +464,7 @@ legend_html = """
 m.get_root().html.add_child(folium.Element(legend_html))
 
 # Toon de kaart in Streamlit
-st.title("Visualisatie Groenaanbod per Buurt")
+st.subheader("Visualisatie Groenaanbod per Buurt")
 st.markdown("""
     Deze kaart toont de verdeling van het **groenaanbod (1-10)** in Amsterdamse buurten. De kleuren geven aan hoe het aanbod zich verhoudt tot het stedelijk gemiddelde van 6,9.
     Het stedelijk gemiddelde van 6,9 is gebaseerd op het gewogen gemiddelde van bewonersbeoordelingen (1-10) over het aanbod van groenvoorzieningen, verzameld via de enquête Wonen in Amsterdam. Alleen buurten met minstens 20 respondenten worden meegenomen voor een representatieve berekening.
@@ -479,7 +479,6 @@ st.subheader("Kaart: Aardgasvrije Woningequivalenten per Buurt")
 st.markdown("""
 Deze kaart toont het aantal **aardgasvrije woningequivalenten** per buurt in Amsterdam.  
 De kleuren geven een indicatie van de mate waarin buurten overgeschakeld zijn op aardgasvrije oplossingen.  
-Klik op een buurt om details te bekijken.
 """)
 
 # Folium kaart maken
