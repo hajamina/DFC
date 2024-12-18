@@ -169,7 +169,7 @@ data.rename(columns={
 }, inplace=True)
 
 # Sorteer de buurten op de hoogste Duurzaamheidsindex en selecteer de top 20
-top_20 = data.sort_values(by='Duurzaamheidsindex', ascending=False).head(20)
+top_20 = data.sort_values(by='Duurzaamheidsindex', ascending=False).head(15)
 
 # Maak een lege subplot met aparte rijen voor elke indicator
 fig = sp.make_subplots(
