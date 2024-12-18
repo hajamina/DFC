@@ -310,9 +310,7 @@ st.markdown(
     Deze kaart toont het **Aanbod groen (1-10)** per buurt in de stad. Hoe hoger de waarde, 
     hoe meer groenvoorzieningen aanwezig zijn in de buurt. De cirkels geven de relatieve score 
     weer, waarbij de grootte en kleur de hoeveelheid aanbod visualiseren.
-    """
-)
-
+    """)
 def get_marker_shape(green_value):
     """Bepaalt de vorm van de marker op basis van de groenwaarde"""
     if green_value <= 3:
