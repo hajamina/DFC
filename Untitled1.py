@@ -468,8 +468,8 @@ m.get_root().html.add_child(folium.Element(legend_html))
 # Toon de kaart in Streamlit
 st.title("Visualisatie Groenaanbod per Buurt")
 st.markdown("""
-    Deze kaart toont het groenaanbod in verschillende buurten van 2023. 
-    De kleuren geven aan hoe het groenaanbod zich verhoudt tot het stedelijk gemiddelde van 6.9.
+    Deze kaart toont de verdeling van het **groenaanbod (1-10)** in Amsterdamse buurten. De kleuren geven aan hoe het aanbod zich verhoudt tot het stedelijk gemiddelde van 6,9.
+    Het stedelijk gemiddelde van 6,9 is gebaseerd op het gewogen gemiddelde van bewonersbeoordelingen (1-10) over het aanbod van groenvoorzieningen, verzameld via de enquête Wonen in Amsterdam. Alleen buurten met minstens 20 respondenten worden meegenomen voor een representatieve berekening.
 """)
 
 # Gebruik Streamlit's components om de Folium-kaart weer te geven
