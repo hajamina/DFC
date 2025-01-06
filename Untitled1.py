@@ -49,7 +49,7 @@ Met deze visualisaties krijgt u inzicht in hoe buurten presteren op het gebied v
 """, unsafe_allow_html=True)
 
 
-gdf = gpd.read_file("output.geojson")
+gdf = gpd.read_file("output3.geojson")
 
 st.subheader("Duurzaamheidsindex per Buurt in Amsterdam")
 st.markdown("""
